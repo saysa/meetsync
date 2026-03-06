@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Domain\Reservation;
 
+use App\Domain\Exception\InvalidTimeslotException;
 use App\Domain\Reservation\Timeslot;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
@@ -21,5 +22,14 @@ final class TimeslotTest extends TestCase
 
         self::assertSame($start, $timeslot->start);
         self::assertSame($end, $timeslot->end);
+    }
+
+    #[Test]
+    public function should_reject_a_zero_duration_timeslot_when_start_equals_end(): void
+    {
+        $this->expectException(InvalidTimeslotException::class);
+
+        $moment = new DateTimeImmutable('2026-03-09 09:00:00');
+        new Timeslot($moment, $moment);
     }
 }
