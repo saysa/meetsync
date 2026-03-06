@@ -17,4 +17,9 @@ final readonly class Timeslot
             throw new InvalidTimeslotException();
         }
     }
+
+    public function conflictsWith(Timeslot $other): bool
+    {
+        return true;
+    }
 }
