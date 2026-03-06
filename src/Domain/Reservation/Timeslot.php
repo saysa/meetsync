@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Reservation;
 
+use App\Domain\Exception\InvalidTimeslotException;
 use DateTimeImmutable;
 
 final readonly class Timeslot
@@ -12,5 +13,8 @@ final readonly class Timeslot
         public DateTimeImmutable $start,
         public DateTimeImmutable $end,
     ) {
+        if ($start == $end) {
+            throw new InvalidTimeslotException();
+        }
     }
 }
