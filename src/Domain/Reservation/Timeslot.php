@@ -20,6 +20,6 @@ final readonly class Timeslot
 
     public function conflictsWith(Timeslot $other): bool
     {
-        return true;
+        return false;
     }
 }
