@@ -1,0 +1,55 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: meetsync-app-dev
+    volumes:
+      - .:/var/www
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      DATABASE_URL: "postgresql://meetsync:meetsync@db:5432/meetsync?serverVersion=13&charset=utf8"
+    depends_on:
+      - db
+    networks:
+      - meetsync_dev
+
+  web:
+    image: nginx:latest
+    container_name: meetsync-nginx-dev
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - meetsync_dev
+
+  db:
+    image: postgres:13
+    container_name: meetsync-db-dev
+    environment:
+      POSTGRES_DB: meetsync
+      POSTGRES_USER: meetsync
+      POSTGRES_PASSWORD: meetsync
+    ports:
+      - "5434:5432"
+    volumes:
+      - dev_db_data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - meetsync_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meetsync -d meetsync"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dev_db_data:
+
+networks:
+  meetsync_dev:
