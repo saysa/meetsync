@@ -21,7 +21,7 @@
 
 | # | Status | Test |
 |---|---|---|
-| 1 | NOT DONE | should represent a valid booking interval when a start time is strictly before the end time |
+| 1 | ✅ DONE | should represent a valid booking interval when a start time is strictly before the end time |
 | 2 | NOT DONE | should reject a zero-duration timeslot when the start time equals the end time |
 | 3 | NOT DONE | should report no conflict between two timeslots when the first ends before the second begins |
 | 4 | NOT DONE | should report a conflict when two timeslots occupy the exact same interval |
