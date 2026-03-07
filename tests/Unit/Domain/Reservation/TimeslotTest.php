@@ -115,6 +115,21 @@ final class TimeslotTest extends TestCase
     }
 
     #[Test]
+    public function should_report_no_conflict_when_second_timeslot_ends_exactly_when_existing_starts(): void
+    {
+        $first  = new Timeslot(
+            new DateTimeImmutable('2026-03-09 09:00:00'),
+            new DateTimeImmutable('2026-03-09 10:00:00'),
+        );
+        $second = new Timeslot(
+            new DateTimeImmutable('2026-03-09 08:00:00'),
+            new DateTimeImmutable('2026-03-09 09:00:00'),
+        );
+
+        self::assertFalse($first->conflictsWith($second));
+    }
+
+    #[Test]
     public function should_reject_a_zero_duration_timeslot_when_start_equals_end(): void
     {
         $this->expectException(InvalidTimeslotException::class);
