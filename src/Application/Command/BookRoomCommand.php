@@ -12,6 +12,6 @@ final readonly class BookRoomCommand
         public string $roomId,
         public DateTimeImmutable $start,
         public DateTimeImmutable $end,
-        public int $participantCount = 0,
+        public int $participantCount,
     ) {}
 }

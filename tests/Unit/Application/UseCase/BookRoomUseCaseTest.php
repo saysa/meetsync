@@ -29,7 +29,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room();
+                    return new Room(capacity: 8);
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
@@ -43,6 +43,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomId: 'eiffel',
             start: new DateTimeImmutable('2026-03-09 10:00:00'),
             end: new DateTimeImmutable('2026-03-09 11:00:00'),
+            participantCount: 3,
         );
 
         $reservationId = $useCase->execute($command);
@@ -59,7 +60,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room();
+                    return new Room(capacity: 8);
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
@@ -81,6 +82,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomId: 'eiffel',
             start: new DateTimeImmutable('2026-03-09 10:30:00'),
             end: new DateTimeImmutable('2026-03-09 11:30:00'),
+            participantCount: 3,
         );
 
         $useCase->execute($command);
@@ -93,7 +95,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room();
+                    return new Room(capacity: 8);
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
@@ -115,6 +117,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomId: 'eiffel',
             start: new DateTimeImmutable('2026-03-09 11:00:00'),
             end: new DateTimeImmutable('2026-03-09 12:00:00'),
+            participantCount: 3,
         );
 
         $reservationId = $useCase->execute($command);
@@ -176,6 +179,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomId: 'unknown-room',
             start: new DateTimeImmutable('2026-03-09 10:00:00'),
             end: new DateTimeImmutable('2026-03-09 11:00:00'),
+            participantCount: 3,
         );
 
         $useCase->execute($command);
