@@ -22,6 +22,10 @@ final readonly class Timeslot
         if ($openingTime !== null && $start < $openingTime) {
             throw new InvalidTimeslotException();
         }
+
+        if ($closingTime !== null && $end > $closingTime) {
+            throw new InvalidTimeslotException();
+        }
     }
 
     public function conflictsWith(Timeslot $other): bool
