@@ -36,7 +36,7 @@
 | # | Status | Test |
 |---|---|---|
 | 1 | ✅ DONE | should create a confirmed reservation when a room is available and all booking rules are satisfied |
-| 2 | NOT DONE | should reject the booking when the requested room does not exist |
+| 2 | ✅ DONE | should reject the booking when the requested room does not exist |
 | 3 | NOT DONE | should reject the booking when the requested timeslot overlaps with an existing reservation |
 | 4 | NOT DONE | should confirm the booking when a second reservation starts exactly when an existing one ends |
 | 5 | NOT DONE | should reject the booking when the number of participants exceeds the room capacity |
