@@ -33,7 +33,7 @@
 | 10 | ✅ DONE | should prevent a timeslot from being created when its start time falls before the building's opening time |
 | 11 | ✅ DONE | should prevent a timeslot from being created when its end time falls after the building's closing time |
 | 12 | ✅ DONE | should allow a timeslot to be created when it starts exactly at the building's opening time |
-| 13 | NOT DONE | should allow a timeslot to be created when it ends exactly at the building's closing time |
+| 13 | ✅ DONE | should allow a timeslot to be created when it ends exactly at the building's closing time |
 
 ---
 
