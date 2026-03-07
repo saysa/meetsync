@@ -41,7 +41,7 @@
 | 4 | ✅ DONE | should confirm the booking when a second reservation starts exactly when an existing one ends |
 | 5 | ✅ DONE | should reject the booking when the number of participants exceeds the room capacity |
 | 6 | ✅ DONE | should confirm the booking when the number of participants equals the room capacity |
-| 7 | NOT DONE | should reject the booking when the start time is before the building opening time |
+| 7 | ✅ DONE | should reject the booking when the start time is before the building opening time |
 | 8 | NOT DONE | should reject the booking when the end time is after the building closing time |
 | 9 | NOT DONE | should reject the booking when the start date is more than 90 days in the future |
 | 10 | NOT DONE | should confirm the booking when the start date is exactly 90 days in the future |
