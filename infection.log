@@ -4,6 +4,18 @@ Note: Pass `--debug` to log test-framework output.
 Escaped mutants:
 ================
 
+1) /var/www/src/Domain/Reservation/Timeslot.php:23    [M] LogicalAnd [ID] 39690b996a51e7bc19b94fe22078d0b5
+
+@@ @@
+
+     public function conflictsWith(Timeslot $other): bool
+     {
+-        return $this->start == $other->start && $this->end == $other->end;
++        return $this->start == $other->start || $this->end == $other->end;
+     }
+ }
+
+
 Timed Out mutants:
 ==================
 
