@@ -21,6 +21,7 @@ final readonly class Timeslot
     public function conflictsWith(Timeslot $other): bool
     {
         return ($other->start >= $this->start && $other->start < $this->end)
-            || ($other->end > $this->start && $other->end <= $this->end);
+            || ($other->end > $this->start && $other->end <= $this->end)
+            || ($other->start < $this->start && $other->end > $this->end);
     }
 }
