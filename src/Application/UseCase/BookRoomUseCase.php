@@ -7,7 +7,7 @@ namespace App\Application\UseCase;
 use App\Application\Command\BookRoomCommand;
 use App\Domain\Reservation\ReservationId;
 
-class BookRoomUseCase
+final class BookRoomUseCase
 {
     public function execute(BookRoomCommand $command): ReservationId
     {

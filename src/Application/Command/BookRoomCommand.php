@@ -6,7 +6,7 @@ namespace App\Application\Command;
 
 use DateTimeImmutable;
 
-class BookRoomCommand
+final readonly class BookRoomCommand
 {
     public function __construct(
         public string $roomId,
