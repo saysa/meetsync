@@ -4,14 +4,14 @@ Note: Pass `--debug` to log test-framework output.
 Escaped mutants:
 ================
 
-1) /var/www/src/Domain/Reservation/Timeslot.php:23    [M] LogicalAnd [ID] 39690b996a51e7bc19b94fe22078d0b5
+1) /var/www/src/Domain/Reservation/Timeslot.php:23    [M] LessThan [ID] 05002d230d4513113f82b12bd24fb758
 
 @@ @@
 
      public function conflictsWith(Timeslot $other): bool
      {
--        return $this->start == $other->start && $this->end == $other->end;
-+        return $this->start == $other->start || $this->end == $other->end;
+-        return $other->start >= $this->start && $other->start < $this->end;
++        return $other->start >= $this->start && $other->start <= $this->end;
      }
  }
 
