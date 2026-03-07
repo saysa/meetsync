@@ -6,6 +6,8 @@ namespace App\Application\UseCase;
 
 use App\Application\Command\BookRoomCommand;
 use App\Application\Exception\RoomNotFoundException;
+use App\Domain\Clock\ClockInterface;
+use App\Domain\Exception\BookingHorizonExceededException;
 use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
 use App\Domain\Reservation\ReservationId;
@@ -19,6 +21,7 @@ final class BookRoomUseCase
     public function __construct(
         private RoomRepositoryInterface $roomRepository,
         private ReservationRepositoryInterface $reservationRepository,
+        private ?ClockInterface $clock = null,
     ) {}
 
     public function execute(BookRoomCommand $command): ReservationId
@@ -30,6 +33,10 @@ final class BookRoomUseCase
 
         if ($command->participantCount > $room->capacity) {
             throw new RoomCapacityExceededException();
+        }
+
+        if ($this->clock !== null && $command->start > $this->clock->now()->modify('+90 days')) {
+            throw new BookingHorizonExceededException();
         }
 
         $newTimeslot = new Timeslot($command->start, $command->end, $room->openingTime, $room->closingTime);
