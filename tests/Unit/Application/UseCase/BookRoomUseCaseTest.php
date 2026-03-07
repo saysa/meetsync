@@ -126,6 +126,36 @@ final class BookRoomUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function should_confirm_the_booking_when_the_number_of_participants_equals_the_room_capacity(): void
+    {
+        $useCase = new BookRoomUseCase(
+            roomRepository: new class implements RoomRepositoryInterface {
+                public function findById(RoomId $roomId): ?Room
+                {
+                    return new Room(capacity: 8);
+                }
+            },
+            reservationRepository: new class implements ReservationRepositoryInterface {
+                public function findByRoomId(RoomId $roomId): array
+                {
+                    return [];
+                }
+            },
+        );
+
+        $command = new BookRoomCommand(
+            roomId: 'eiffel',
+            start: new DateTimeImmutable('2026-03-09 10:00:00'),
+            end: new DateTimeImmutable('2026-03-09 11:00:00'),
+            participantCount: 8,
+        );
+
+        $reservationId = $useCase->execute($command);
+
+        self::assertInstanceOf(ReservationId::class, $reservationId);
+    }
+
+    #[Test]
     public function should_reject_the_booking_when_the_number_of_participants_exceeds_the_room_capacity(): void
     {
         $this->expectException(RoomCapacityExceededException::class);
