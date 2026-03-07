@@ -10,7 +10,7 @@ final readonly class Room
 {
     public function __construct(
         public int $capacity,
-        public ?DateTimeImmutable $openingTime = null,
-        public ?DateTimeImmutable $closingTime = null,
+        public DateTimeImmutable $openingTime,
+        public DateTimeImmutable $closingTime,
     ) {}
 }

@@ -30,7 +30,11 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room(capacity: 8);
+                    return new Room(
+                        capacity: 8,
+                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+                    );
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
@@ -61,7 +65,11 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room(capacity: 8);
+                    return new Room(
+                        capacity: 8,
+                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+                    );
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
@@ -96,7 +104,11 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room(capacity: 8);
+                    return new Room(
+                        capacity: 8,
+                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+                    );
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
@@ -133,7 +145,11 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room(capacity: 8);
+                    return new Room(
+                        capacity: 8,
+                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+                    );
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
@@ -165,7 +181,11 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
-                    return new Room(capacity: 8);
+                    return new Room(
+                        capacity: 8,
+                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+                    );
                 }
             },
             reservationRepository: new class implements ReservationRepositoryInterface {
