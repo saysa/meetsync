@@ -29,7 +29,7 @@
 | 6 | ✅ DONE | should report a conflict when a second timeslot starts before an existing timeslot and ends inside it |
 | 7 | ✅ DONE | should report a conflict when a second timeslot completely contains an existing timeslot |
 | 8 | ✅ DONE | should report no conflict when a second timeslot begins exactly at the moment an existing timeslot ends |
-| 9 | NOT DONE | should report no conflict when a second timeslot ends exactly at the moment an existing timeslot starts |
+| 9 | ✅ DONE | should report no conflict when a second timeslot ends exactly at the moment an existing timeslot starts |
 | 10 | NOT DONE | should prevent a timeslot from being created when its start time falls before the building's opening time |
 | 11 | NOT DONE | should prevent a timeslot from being created when its end time falls after the building's closing time |
 | 12 | NOT DONE | should allow a timeslot to be created when it starts exactly at the building's opening time |
