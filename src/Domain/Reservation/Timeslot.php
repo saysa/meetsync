@@ -12,8 +12,8 @@ final readonly class Timeslot
     public function __construct(
         public DateTimeImmutable $start,
         public DateTimeImmutable $end,
-        public ?DateTimeImmutable $openingTime = null,
-        public ?DateTimeImmutable $closingTime = null,
+        ?DateTimeImmutable $openingTime = null,
+        ?DateTimeImmutable $closingTime = null,
     ) {
         if ($start == $end) {
             throw new InvalidTimeslotException();
