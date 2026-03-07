@@ -39,7 +39,7 @@
 | 2 | ✅ DONE | should reject the booking when the requested room does not exist |
 | 3 | ✅ DONE | should reject the booking when the requested timeslot overlaps with an existing reservation |
 | 4 | ✅ DONE | should confirm the booking when a second reservation starts exactly when an existing one ends |
-| 5 | NOT DONE | should reject the booking when the number of participants exceeds the room capacity |
+| 5 | ✅ DONE | should reject the booking when the number of participants exceeds the room capacity |
 | 6 | NOT DONE | should confirm the booking when the number of participants equals the room capacity |
 | 7 | NOT DONE | should reject the booking when the start time is before the building opening time |
 | 8 | NOT DONE | should reject the booking when the end time is after the building closing time |
