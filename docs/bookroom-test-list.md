@@ -35,7 +35,7 @@
 
 | # | Status | Test |
 |---|---|---|
-| 1 | NOT DONE | should create a confirmed reservation when a room is available and all booking rules are satisfied |
+| 1 | ✅ DONE | should create a confirmed reservation when a room is available and all booking rules are satisfied |
 | 2 | NOT DONE | should reject the booking when the requested room does not exist |
 | 3 | NOT DONE | should reject the booking when the requested timeslot overlaps with an existing reservation |
 | 4 | NOT DONE | should confirm the booking when a second reservation starts exactly when an existing one ends |
