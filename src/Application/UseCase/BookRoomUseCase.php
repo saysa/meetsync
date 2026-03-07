@@ -6,6 +6,7 @@ namespace App\Application\UseCase;
 
 use App\Application\Command\BookRoomCommand;
 use App\Application\Exception\RoomNotFoundException;
+use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
@@ -25,6 +26,10 @@ final class BookRoomUseCase
         $room = $this->roomRepository->findById(new RoomId($command->roomId));
         if ($room === null) {
             throw new RoomNotFoundException();
+        }
+
+        if ($command->participantCount > $room->capacity) {
+            throw new RoomCapacityExceededException();
         }
 
         $newTimeslot = new Timeslot($command->start, $command->end);
