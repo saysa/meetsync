@@ -143,6 +143,19 @@ final class TimeslotTest extends TestCase
     }
 
     #[Test]
+    public function should_prevent_creation_when_end_falls_after_buildings_closing_time(): void
+    {
+        $this->expectException(InvalidTimeslotException::class);
+
+        new Timeslot(
+            start: new DateTimeImmutable('2026-03-09 17:00:00'),
+            end: new DateTimeImmutable('2026-03-09 20:00:00'),
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+        );
+    }
+
+    #[Test]
     public function should_reject_a_zero_duration_timeslot_when_start_equals_end(): void
     {
         $this->expectException(InvalidTimeslotException::class);
