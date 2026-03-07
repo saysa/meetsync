@@ -172,6 +172,22 @@ final class TimeslotTest extends TestCase
     }
 
     #[Test]
+    public function should_allow_creation_when_end_is_exactly_at_buildings_closing_time(): void
+    {
+        $timeslot = new Timeslot(
+            start: new DateTimeImmutable('2026-03-09 17:00:00'),
+            end: new DateTimeImmutable('2026-03-09 19:00:00'),
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+        );
+
+        self::assertSame(
+            new DateTimeImmutable('2026-03-09 19:00:00')->getTimestamp(),
+            $timeslot->end->getTimestamp(),
+        );
+    }
+
+    #[Test]
     public function should_reject_a_zero_duration_timeslot_when_start_equals_end(): void
     {
         $this->expectException(InvalidTimeslotException::class);
