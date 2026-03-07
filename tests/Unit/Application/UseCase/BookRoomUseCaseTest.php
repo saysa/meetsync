@@ -20,7 +20,14 @@ final class BookRoomUseCaseTest extends TestCase
     #[Test]
     public function should_create_a_confirmed_reservation_when_a_room_is_available_and_all_booking_rules_are_satisfied(): void
     {
-        $useCase = new BookRoomUseCase();
+        $useCase = new BookRoomUseCase(
+            new class implements RoomRepositoryInterface {
+                public function findById(RoomId $roomId): ?Room
+                {
+                    return new Room();
+                }
+            }
+        );
         $command = new BookRoomCommand(
             roomId: 'eiffel',
             start: new DateTimeImmutable('2026-03-09 10:00:00'),
