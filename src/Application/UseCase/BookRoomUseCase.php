@@ -32,7 +32,7 @@ final class BookRoomUseCase
             throw new RoomCapacityExceededException();
         }
 
-        $newTimeslot = new Timeslot($command->start, $command->end);
+        $newTimeslot = new Timeslot($command->start, $command->end, $room->openingTime, $room->closingTime);
         foreach ($this->reservationRepository->findByRoomId(new RoomId($command->roomId)) as $existing) {
             if ($existing->timeslot()->conflictsWith($newTimeslot)) {
                 throw new TimeslotConflictException();
