@@ -26,7 +26,7 @@
 | 3 | ✅ DONE | should report no conflict between two timeslots when the first ends before the second begins |
 | 4 | ✅ DONE | should report a conflict when two timeslots occupy the exact same interval |
 | 5 | ✅ DONE | should report a conflict when a second timeslot starts inside an existing timeslot and ends after it |
-| 6 | NOT DONE | should report a conflict when a second timeslot starts before an existing timeslot and ends inside it |
+| 6 | ✅ DONE | should report a conflict when a second timeslot starts before an existing timeslot and ends inside it |
 | 7 | NOT DONE | should report a conflict when a second timeslot completely contains an existing timeslot |
 | 8 | NOT DONE | should report no conflict when a second timeslot begins exactly at the moment an existing timeslot ends |
 | 9 | NOT DONE | should report no conflict when a second timeslot ends exactly at the moment an existing timeslot starts |
