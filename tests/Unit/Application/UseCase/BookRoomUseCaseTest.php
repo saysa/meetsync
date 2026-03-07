@@ -7,6 +7,8 @@ namespace App\Tests\Unit\Application\UseCase;
 use App\Application\Command\BookRoomCommand;
 use App\Application\Exception\RoomNotFoundException;
 use App\Application\UseCase\BookRoomUseCase;
+use App\Domain\Clock\ClockInterface;
+use App\Domain\Exception\BookingHorizonExceededException;
 use App\Domain\Exception\InvalidTimeslotException;
 use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
@@ -268,6 +270,46 @@ final class BookRoomUseCaseTest extends TestCase
             roomId: 'eiffel',
             start: new DateTimeImmutable('2026-03-09 17:00:00'),
             end: new DateTimeImmutable('2026-03-09 20:00:00'),
+            participantCount: 3,
+        );
+
+        $useCase->execute($command);
+    }
+
+    #[Test]
+    public function should_reject_the_booking_when_the_start_date_is_more_than_90_days_in_the_future(): void
+    {
+        $this->expectException(BookingHorizonExceededException::class);
+
+        $useCase = new BookRoomUseCase(
+            roomRepository: new class implements RoomRepositoryInterface {
+                public function findById(RoomId $roomId): ?Room
+                {
+                    return new Room(
+                        capacity: 8,
+                        openingTime: new DateTimeImmutable('2026-06-08 08:00:00'),
+                        closingTime: new DateTimeImmutable('2026-06-08 19:00:00'),
+                    );
+                }
+            },
+            reservationRepository: new class implements ReservationRepositoryInterface {
+                public function findByRoomId(RoomId $roomId): array
+                {
+                    return [];
+                }
+            },
+            clock: new class implements ClockInterface {
+                public function now(): DateTimeImmutable
+                {
+                    return new DateTimeImmutable('2026-03-09 09:00:00');
+                }
+            },
+        );
+
+        $command = new BookRoomCommand(
+            roomId: 'eiffel',
+            start: new DateTimeImmutable('2026-06-08 10:00:00'),
+            end: new DateTimeImmutable('2026-06-08 11:00:00'),
             participantCount: 3,
         );
 
