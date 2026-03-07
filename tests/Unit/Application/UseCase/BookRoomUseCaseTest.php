@@ -25,12 +25,18 @@ final class BookRoomUseCaseTest extends TestCase
     public function should_create_a_confirmed_reservation_when_a_room_is_available_and_all_booking_rules_are_satisfied(): void
     {
         $useCase = new BookRoomUseCase(
-            new class implements RoomRepositoryInterface {
+            roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
                     return new Room();
                 }
-            }
+            },
+            reservationRepository: new class implements ReservationRepositoryInterface {
+                public function findByRoomId(RoomId $roomId): array
+                {
+                    return [];
+                }
+            },
         );
         $command = new BookRoomCommand(
             roomId: 'eiffel',
@@ -85,12 +91,18 @@ final class BookRoomUseCaseTest extends TestCase
         $this->expectException(RoomNotFoundException::class);
 
         $useCase = new BookRoomUseCase(
-            new class implements RoomRepositoryInterface {
+            roomRepository: new class implements RoomRepositoryInterface {
                 public function findById(RoomId $roomId): ?Room
                 {
                     return null;
                 }
-            }
+            },
+            reservationRepository: new class implements ReservationRepositoryInterface {
+                public function findByRoomId(RoomId $roomId): array
+                {
+                    return [];
+                }
+            },
         );
 
         $command = new BookRoomCommand(

@@ -17,7 +17,7 @@ final class BookRoomUseCase
 {
     public function __construct(
         private RoomRepositoryInterface $roomRepository,
-        private ?ReservationRepositoryInterface $reservationRepository = null,
+        private ReservationRepositoryInterface $reservationRepository,
     ) {}
 
     public function execute(BookRoomCommand $command): ReservationId
@@ -27,12 +27,10 @@ final class BookRoomUseCase
             throw new RoomNotFoundException();
         }
 
-        if ($this->reservationRepository !== null) {
-            $newTimeslot = new Timeslot($command->start, $command->end);
-            foreach ($this->reservationRepository->findByRoomId(new RoomId($command->roomId)) as $existing) {
-                if ($existing->timeslot()->conflictsWith($newTimeslot)) {
-                    throw new TimeslotConflictException();
-                }
+        $newTimeslot = new Timeslot($command->start, $command->end);
+        foreach ($this->reservationRepository->findByRoomId(new RoomId($command->roomId)) as $existing) {
+            if ($existing->timeslot()->conflictsWith($newTimeslot)) {
+                throw new TimeslotConflictException();
             }
         }
 
