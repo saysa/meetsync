@@ -321,6 +321,27 @@ final class BookRoomUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function should_confirm_the_booking_when_the_start_time_is_exactly_30_minutes_from_now(): void
+    {
+        $useCase = new BookRoomUseCase(
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
+        );
+
+        $command = new BookRoomCommand(
+            roomId: 'eiffel',
+            start: new DateTimeImmutable('2026-03-09 09:30:00'),
+            end: new DateTimeImmutable('2026-03-09 10:30:00'),
+            participantCount: 3,
+        );
+
+        $reservationId = $useCase->execute($command);
+
+        self::assertInstanceOf(ReservationId::class, $reservationId);
+    }
+
+    #[Test]
     public function should_reject_the_booking_when_the_requested_room_does_not_exist(): void
     {
         $this->expectException(RoomNotFoundException::class);
