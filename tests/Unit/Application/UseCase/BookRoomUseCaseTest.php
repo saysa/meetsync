@@ -9,6 +9,7 @@ use App\Application\Exception\RoomNotFoundException;
 use App\Application\UseCase\BookRoomUseCase;
 use App\Domain\Clock\ClockInterface;
 use App\Domain\Exception\BookingHorizonExceededException;
+use App\Domain\Exception\InsufficientAdvanceNoticeException;
 use App\Domain\Exception\InvalidTimeslotException;
 use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
@@ -296,6 +297,27 @@ final class BookRoomUseCaseTest extends TestCase
         $reservationId = $useCase->execute($command);
 
         self::assertInstanceOf(ReservationId::class, $reservationId);
+    }
+
+    #[Test]
+    public function should_reject_the_booking_when_the_start_time_is_less_than_30_minutes_from_now(): void
+    {
+        $this->expectException(InsufficientAdvanceNoticeException::class);
+
+        $useCase = new BookRoomUseCase(
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
+        );
+
+        $command = new BookRoomCommand(
+            roomId: 'eiffel',
+            start: new DateTimeImmutable('2026-03-09 09:20:00'),
+            end: new DateTimeImmutable('2026-03-09 10:20:00'),
+            participantCount: 3,
+        );
+
+        $useCase->execute($command);
     }
 
     #[Test]
