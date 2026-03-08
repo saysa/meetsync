@@ -45,7 +45,7 @@
 | 8 | ✅ DONE | should reject the booking when the end time is after the building closing time |
 | 9 | ✅ DONE | should reject the booking when the start date is more than 90 days in the future |
 | 10 | ✅ DONE | should confirm the booking when the start date is exactly 90 days in the future |
-| 11 | NOT DONE | should reject the booking when the start time is less than 30 minutes from now |
+| 11 | ✅ DONE | should reject the booking when the start time is less than 30 minutes from now |
 | 12 | NOT DONE | should confirm the booking when the start time is exactly 30 minutes from now |
 
 ---
