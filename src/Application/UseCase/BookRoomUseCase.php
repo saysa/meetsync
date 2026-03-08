@@ -8,6 +8,7 @@ use App\Application\Command\BookRoomCommand;
 use App\Application\Exception\RoomNotFoundException;
 use App\Domain\Clock\ClockInterface;
 use App\Domain\Exception\BookingHorizonExceededException;
+use App\Domain\Exception\InsufficientAdvanceNoticeException;
 use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
 use App\Domain\Reservation\ReservationId;
@@ -40,6 +41,10 @@ final class BookRoomUseCase
         }
 
         $newTimeslot = new Timeslot($command->start, $command->end, $room->openingTime, $room->closingTime);
+
+        if ($command->start < $this->clock->now()->modify('+30 minutes')) {
+            throw new InsufficientAdvanceNoticeException();
+        }
         foreach ($this->reservationRepository->findByRoomId(new RoomId($command->roomId)) as $existing) {
             if ($existing->timeslot()->conflictsWith($newTimeslot)) {
                 throw new TimeslotConflictException();
