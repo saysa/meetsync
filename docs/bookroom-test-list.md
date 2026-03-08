@@ -43,7 +43,7 @@
 | 6 | ✅ DONE | should confirm the booking when the number of participants equals the room capacity |
 | 7 | ✅ DONE | should reject the booking when the start time is before the building opening time |
 | 8 | ✅ DONE | should reject the booking when the end time is after the building closing time |
-| 9 | NOT DONE | should reject the booking when the start date is more than 90 days in the future |
+| 9 | ✅ DONE | should reject the booking when the start date is more than 90 days in the future |
 | 10 | NOT DONE | should confirm the booking when the start date is exactly 90 days in the future |
 | 11 | NOT DONE | should reject the booking when the start time is less than 30 minutes from now |
 | 12 | NOT DONE | should confirm the booking when the start time is exactly 30 minutes from now |
