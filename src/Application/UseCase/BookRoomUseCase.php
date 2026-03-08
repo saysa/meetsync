@@ -21,7 +21,7 @@ final class BookRoomUseCase
     public function __construct(
         private RoomRepositoryInterface $roomRepository,
         private ReservationRepositoryInterface $reservationRepository,
-        private ?ClockInterface $clock = null,
+        private ClockInterface $clock,
     ) {}
 
     public function execute(BookRoomCommand $command): ReservationId
@@ -35,7 +35,7 @@ final class BookRoomUseCase
             throw new RoomCapacityExceededException();
         }
 
-        if ($this->clock !== null && $command->start > $this->clock->now()->modify('+90 days')) {
+        if ($command->start > $this->clock->now()->modify('+90 days')) {
             throw new BookingHorizonExceededException();
         }
 

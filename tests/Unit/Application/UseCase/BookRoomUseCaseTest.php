@@ -25,26 +25,56 @@ use PHPUnit\Framework\TestCase;
 
 final class BookRoomUseCaseTest extends TestCase
 {
+    private function roomRepository(Room $room): RoomRepositoryInterface
+    {
+        return new class ($room) implements RoomRepositoryInterface {
+            public function __construct(private Room $room) {}
+
+            public function findById(RoomId $roomId): ?Room
+            {
+                return $this->room;
+            }
+        };
+    }
+
+    private function emptyReservationRepository(): ReservationRepositoryInterface
+    {
+        return new class implements ReservationRepositoryInterface {
+            public function findByRoomId(RoomId $roomId): array
+            {
+                return [];
+            }
+        };
+    }
+
+    private function fixedClock(string $now = '2026-03-09 09:00:00'): ClockInterface
+    {
+        return new class ($now) implements ClockInterface {
+            public function __construct(private string $now) {}
+
+            public function now(): DateTimeImmutable
+            {
+                return new DateTimeImmutable($this->now);
+            }
+        };
+    }
+
+    private function eiffelRoom(): Room
+    {
+        return new Room(
+            capacity: 8,
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+        );
+    }
+
     #[Test]
     public function should_create_a_confirmed_reservation_when_a_room_is_available_and_all_booking_rules_are_satisfied(): void
     {
         $useCase = new BookRoomUseCase(
-            roomRepository: new class implements RoomRepositoryInterface {
-                public function findById(RoomId $roomId): ?Room
-                {
-                    return new Room(
-                        capacity: 8,
-                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-                    );
-                }
-            },
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [];
-                }
-            },
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
         );
         $command = new BookRoomCommand(
             roomId: 'eiffel',
@@ -64,16 +94,7 @@ final class BookRoomUseCaseTest extends TestCase
         $this->expectException(TimeslotConflictException::class);
 
         $useCase = new BookRoomUseCase(
-            roomRepository: new class implements RoomRepositoryInterface {
-                public function findById(RoomId $roomId): ?Room
-                {
-                    return new Room(
-                        capacity: 8,
-                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-                    );
-                }
-            },
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: new class implements ReservationRepositoryInterface {
                 public function findByRoomId(RoomId $roomId): array
                 {
@@ -87,6 +108,7 @@ final class BookRoomUseCaseTest extends TestCase
                     ];
                 }
             },
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
@@ -103,16 +125,7 @@ final class BookRoomUseCaseTest extends TestCase
     public function should_confirm_the_booking_when_a_second_reservation_starts_exactly_when_an_existing_one_ends(): void
     {
         $useCase = new BookRoomUseCase(
-            roomRepository: new class implements RoomRepositoryInterface {
-                public function findById(RoomId $roomId): ?Room
-                {
-                    return new Room(
-                        capacity: 8,
-                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-                    );
-                }
-            },
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: new class implements ReservationRepositoryInterface {
                 public function findByRoomId(RoomId $roomId): array
                 {
@@ -126,6 +139,7 @@ final class BookRoomUseCaseTest extends TestCase
                     ];
                 }
             },
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
@@ -144,22 +158,9 @@ final class BookRoomUseCaseTest extends TestCase
     public function should_confirm_the_booking_when_the_number_of_participants_equals_the_room_capacity(): void
     {
         $useCase = new BookRoomUseCase(
-            roomRepository: new class implements RoomRepositoryInterface {
-                public function findById(RoomId $roomId): ?Room
-                {
-                    return new Room(
-                        capacity: 8,
-                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-                    );
-                }
-            },
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [];
-                }
-            },
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
@@ -180,22 +181,9 @@ final class BookRoomUseCaseTest extends TestCase
         $this->expectException(RoomCapacityExceededException::class);
 
         $useCase = new BookRoomUseCase(
-            roomRepository: new class implements RoomRepositoryInterface {
-                public function findById(RoomId $roomId): ?Room
-                {
-                    return new Room(
-                        capacity: 8,
-                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-                    );
-                }
-            },
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [];
-                }
-            },
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
@@ -214,22 +202,9 @@ final class BookRoomUseCaseTest extends TestCase
         $this->expectException(InvalidTimeslotException::class);
 
         $useCase = new BookRoomUseCase(
-            roomRepository: new class implements RoomRepositoryInterface {
-                public function findById(RoomId $roomId): ?Room
-                {
-                    return new Room(
-                        capacity: 8,
-                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-                    );
-                }
-            },
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [];
-                }
-            },
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
@@ -248,22 +223,9 @@ final class BookRoomUseCaseTest extends TestCase
         $this->expectException(InvalidTimeslotException::class);
 
         $useCase = new BookRoomUseCase(
-            roomRepository: new class implements RoomRepositoryInterface {
-                public function findById(RoomId $roomId): ?Room
-                {
-                    return new Room(
-                        capacity: 8,
-                        openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-                        closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-                    );
-                }
-            },
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [];
-                }
-            },
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
@@ -292,18 +254,8 @@ final class BookRoomUseCaseTest extends TestCase
                     );
                 }
             },
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [];
-                }
-            },
-            clock: new class implements ClockInterface {
-                public function now(): DateTimeImmutable
-                {
-                    return new DateTimeImmutable('2026-03-09 09:00:00');
-                }
-            },
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
@@ -328,12 +280,8 @@ final class BookRoomUseCaseTest extends TestCase
                     return null;
                 }
             },
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [];
-                }
-            },
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
         );
 
         $command = new BookRoomCommand(
