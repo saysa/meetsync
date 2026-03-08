@@ -27,7 +27,10 @@ final class BookRoomUseCase
 
     public function execute(BookRoomCommand $command): ReservationId
     {
-        $room = $this->roomRepository->findById(new RoomId($command->roomId));
+        $roomId = new RoomId($command->roomId);
+        $now = $this->clock->now();
+
+        $room = $this->roomRepository->findById($roomId);
         if ($room === null) {
             throw new RoomNotFoundException();
         }
@@ -36,16 +39,17 @@ final class BookRoomUseCase
             throw new RoomCapacityExceededException();
         }
 
-        if ($command->start > $this->clock->now()->modify('+90 days')) {
+        if ($command->start > $now->modify('+90 days')) {
             throw new BookingHorizonExceededException();
         }
 
         $newTimeslot = new Timeslot($command->start, $command->end, $room->openingTime, $room->closingTime);
 
-        if ($command->start < $this->clock->now()->modify('+30 minutes')) {
+        if ($command->start < $now->modify('+30 minutes')) {
             throw new InsufficientAdvanceNoticeException();
         }
-        foreach ($this->reservationRepository->findByRoomId(new RoomId($command->roomId)) as $existing) {
+
+        foreach ($this->reservationRepository->findByRoomId($roomId) as $existing) {
             if ($existing->timeslot()->conflictsWith($newTimeslot)) {
                 throw new TimeslotConflictException();
             }
