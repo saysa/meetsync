@@ -8,4 +8,8 @@ interface ReservationRepositoryInterface
 {
     /** @return Reservation[] */
     public function findByRoomId(RoomId $roomId): array;
+
+    public function findById(ReservationId $id): ?Reservation;
+
+    public function save(Reservation $reservation): void;
 }

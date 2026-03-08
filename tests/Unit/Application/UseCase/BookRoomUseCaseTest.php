@@ -41,10 +41,9 @@ final class BookRoomUseCaseTest extends TestCase
     private function emptyReservationRepository(): ReservationRepositoryInterface
     {
         return new class implements ReservationRepositoryInterface {
-            public function findByRoomId(RoomId $roomId): array
-            {
-                return [];
-            }
+            public function findByRoomId(RoomId $roomId): array { return []; }
+            public function findById(ReservationId $id): ?Reservation { return null; }
+            public function save(Reservation $reservation): void {}
         };
     }
 
@@ -101,13 +100,17 @@ final class BookRoomUseCaseTest extends TestCase
                 {
                     return [
                         new Reservation(
-                            new Timeslot(
+                            id: new ReservationId('res-1'),
+                            organizerId: 'alice',
+                            timeslot: new Timeslot(
                                 new DateTimeImmutable('2026-03-09 10:00:00'),
                                 new DateTimeImmutable('2026-03-09 11:00:00'),
-                            )
+                            ),
                         ),
                     ];
                 }
+                public function findById(ReservationId $id): ?Reservation { return null; }
+                public function save(Reservation $reservation): void {}
             },
             clock: $this->fixedClock(),
         );
@@ -132,13 +135,17 @@ final class BookRoomUseCaseTest extends TestCase
                 {
                     return [
                         new Reservation(
-                            new Timeslot(
+                            id: new ReservationId('res-2'),
+                            organizerId: 'alice',
+                            timeslot: new Timeslot(
                                 new DateTimeImmutable('2026-03-09 10:00:00'),
                                 new DateTimeImmutable('2026-03-09 11:00:00'),
-                            )
+                            ),
                         ),
                     ];
                 }
+                public function findById(ReservationId $id): ?Reservation { return null; }
+                public function save(Reservation $reservation): void {}
             },
             clock: $this->fixedClock(),
         );
