@@ -31,7 +31,7 @@
 
 | # | Status | Test |
 |---|---|---|
-| 1 | NOT DONE | should cancel a confirmed reservation when the organizer requests the cancellation before it starts |
+| 1 | ✅ DONE | should cancel a confirmed reservation when the organizer requests the cancellation before it starts |
 | 2 | NOT DONE | should reject the cancellation when the reservation does not exist |
 | 3 | NOT DONE | should reject the cancellation when the requester is not the organizer of the reservation |
 | 4 | NOT DONE | should reject the cancellation when the reservation has already started |
