@@ -13,4 +13,14 @@ final readonly class Room
         public DateTimeImmutable $openingTime,
         public DateTimeImmutable $closingTime,
     ) {}
+
+    public function canAccommodate(int $participantCount): bool
+    {
+        return $participantCount <= $this->capacity;
+    }
+
+    public function createTimeslot(DateTimeImmutable $start, DateTimeImmutable $end): Timeslot
+    {
+        return new Timeslot($start, $end, $this->openingTime, $this->closingTime);
+    }
 }

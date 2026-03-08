@@ -15,10 +15,12 @@ use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\RoomId;
 use App\Domain\Reservation\RoomRepositoryInterface;
-use App\Domain\Reservation\Timeslot;
 
 final class BookRoomUseCase
 {
+    private const string BOOKING_HORIZON = '+90 days';
+    private const string MIN_ADVANCE_NOTICE = '+30 minutes';
+
     public function __construct(
         private RoomRepositoryInterface $roomRepository,
         private ReservationRepositoryInterface $reservationRepository,
@@ -35,17 +37,17 @@ final class BookRoomUseCase
             throw new RoomNotFoundException();
         }
 
-        if ($command->participantCount > $room->capacity) {
+        if (!$room->canAccommodate($command->participantCount)) {
             throw new RoomCapacityExceededException();
         }
 
-        if ($command->start > $now->modify('+90 days')) {
+        if ($command->start > $now->modify(self::BOOKING_HORIZON)) {
             throw new BookingHorizonExceededException();
         }
 
-        $newTimeslot = new Timeslot($command->start, $command->end, $room->openingTime, $room->closingTime);
+        $newTimeslot = $room->createTimeslot($command->start, $command->end);
 
-        if ($command->start < $now->modify('+30 minutes')) {
+        if ($command->start < $now->modify(self::MIN_ADVANCE_NOTICE)) {
             throw new InsufficientAdvanceNoticeException();
         }
 
