@@ -9,7 +9,7 @@ use App\Domain\Clock\ClockInterface;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 
-class CancelReservationUseCase
+final class CancelReservationUseCase
 {
     public function __construct(
         private ReservationRepositoryInterface $reservationRepository,

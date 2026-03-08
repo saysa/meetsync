@@ -50,7 +50,7 @@ final class BookRoomUseCase
         }
 
         foreach ($this->reservationRepository->findByRoomId($roomId) as $existing) {
-            if ($existing->timeslot()->conflictsWith($newTimeslot)) {
+            if ($existing->conflictsWith($newTimeslot)) {
                 throw new TimeslotConflictException();
             }
         }

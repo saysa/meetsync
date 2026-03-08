@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Reservation;
 
-class Reservation
+final class Reservation
 {
     public function __construct(
         private ReservationId $id,
@@ -12,8 +12,8 @@ class Reservation
         private Timeslot $timeslot,
     ) {}
 
-    public function timeslot(): Timeslot
+    public function conflictsWith(Timeslot $other): bool
     {
-        return $this->timeslot;
+        return $this->timeslot->conflictsWith($other);
     }
 }
