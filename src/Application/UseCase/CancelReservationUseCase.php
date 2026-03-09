@@ -18,6 +18,8 @@ final class CancelReservationUseCase
 
     public function execute(CancelReservationCommand $command): void
     {
-        $this->reservationRepository->findById(new ReservationId($command->reservationId));
+        $reservation = $this->reservationRepository->findById(new ReservationId($command->reservationId));
+        $reservation->cancel();
+        $this->reservationRepository->save($reservation);
     }
 }
