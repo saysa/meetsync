@@ -33,28 +33,40 @@ final class CancelReservationUseCaseTest extends TestCase
     #[Test]
     public function should_cancel_a_confirmed_reservation_when_the_organizer_requests_the_cancellation_before_it_starts(): void
     {
-        $this->expectNotToPerformAssertions();
+        $reservation = new Reservation(
+            id: new ReservationId('res-1'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-09 14:00:00'),
+                new DateTimeImmutable('2026-03-09 15:00:00'),
+                new DateTimeImmutable('2026-03-09 08:00:00'),
+                new DateTimeImmutable('2026-03-09 19:00:00'),
+            ),
+        );
+
+        $capturingRepository = new class ($reservation) implements ReservationRepositoryInterface {
+            public ?Reservation $saved = null;
+
+            public function __construct(private Reservation $reservation) {}
+
+            public function findByRoomId(RoomId $roomId): array
+            {
+                return [];
+            }
+
+            public function findById(ReservationId $id): ?Reservation
+            {
+                return $this->reservation;
+            }
+
+            public function save(Reservation $reservation): void
+            {
+                $this->saved = $reservation;
+            }
+        };
 
         $useCase = new CancelReservationUseCase(
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array { return []; }
-
-                public function findById(ReservationId $id): ?Reservation
-                {
-                    return new Reservation(
-                        id: new ReservationId('res-1'),
-                        organizerId: 'alice',
-                        timeslot: new Timeslot(
-                            new DateTimeImmutable('2026-03-09 14:00:00'),
-                            new DateTimeImmutable('2026-03-09 15:00:00'),
-                            new DateTimeImmutable('2026-03-09 08:00:00'),
-                            new DateTimeImmutable('2026-03-09 19:00:00'),
-                        ),
-                    );
-                }
-
-                public function save(Reservation $reservation): void {}
-            },
+            reservationRepository: $capturingRepository,
             clock: $this->fixedClock(),
         );
 
@@ -64,5 +76,8 @@ final class CancelReservationUseCaseTest extends TestCase
         );
 
         $useCase->execute($command);
+
+        self::assertNotNull($capturingRepository->saved);
+        self::assertTrue($capturingRepository->saved->isCancelled());
     }
 }
