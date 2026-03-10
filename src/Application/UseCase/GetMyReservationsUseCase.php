@@ -19,6 +19,6 @@ final class GetMyReservationsUseCase
     /** @return Reservation[] */
     public function execute(GetMyReservationsQuery $query): array
     {
-        return [];
+        return $this->reservationRepository->findByOrganizerId($query->organizerId);
     }
 }
