@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Reservation;
 
+use DateTimeImmutable;
+
 final class Reservation
 {
     private bool $cancelled = false;
@@ -14,7 +16,7 @@ final class Reservation
         private Timeslot $timeslot,
     ) {}
 
-    public function hasStarted(\DateTimeImmutable $now): bool
+    public function hasStarted(DateTimeImmutable $now): bool
     {
         return $now >= $this->timeslot->start;
     }
