@@ -16,7 +16,7 @@ final class GetMyReservationsUseCase
         private readonly ClockInterface $clock,
     ) {}
 
-    /** @return Reservation[] */
+    /** @return list<Reservation> */
     public function execute(GetMyReservationsQuery $query): array
     {
         $reservations = $this->reservationRepository->findByOrganizerId($query->organizerId);
