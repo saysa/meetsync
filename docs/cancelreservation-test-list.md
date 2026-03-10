@@ -35,6 +35,7 @@
 | 2 | ✅ DONE | should reject the cancellation when the reservation does not exist |
 | 3 | ✅ DONE | should reject the cancellation when the requester is not the organizer of the reservation |
 | 4 | ✅ DONE | should reject the cancellation when the reservation has already started |
+| 5 | ✅ DONE | should reject the cancellation when the organizer cancels exactly at the reservation start time — boundary/mutation-kill for `>=` in `Reservation::hasStarted()` |
 
 ---
 
@@ -46,6 +47,7 @@
 | 2 | conditional (4) | Forces `findById()` on repo + null check → ReservationNotFoundException |
 | 3 | conditional (4) | Forces `organizerId` on Reservation + identity check → NotTheOrganizerException |
 | 4 | conditional (4) | Forces clock + timeslot start comparison → ReservationAlreadyStartedException |
+| 5 | boundary (mutation kill) | `now == start` must be rejected — kills surviving `>=` → `>` mutant |
 
 ---
 
