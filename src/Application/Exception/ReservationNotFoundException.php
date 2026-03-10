@@ -4,4 +4,4 @@ declare(strict_types=1);
 
 namespace App\Application\Exception;
 
-final class ReservationNotFoundException extends \RuntimeException {}
+final class ReservationNotFoundException extends ApplicationException {}

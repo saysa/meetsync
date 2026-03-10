@@ -13,8 +13,8 @@ use App\Domain\Reservation\ReservationRepositoryInterface;
 final class CancelReservationUseCase
 {
     public function __construct(
-        private ReservationRepositoryInterface $reservationRepository,
-        private ClockInterface $clock,
+        private readonly ReservationRepositoryInterface $reservationRepository,
+        private readonly ClockInterface $clock,
     ) {}
 
     public function execute(CancelReservationCommand $command): void

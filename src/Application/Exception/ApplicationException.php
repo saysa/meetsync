@@ -4,4 +4,4 @@ declare(strict_types=1);
 
 namespace App\Application\Exception;
 
-final class RoomNotFoundException extends ApplicationException {}
+abstract class ApplicationException extends \RuntimeException {}
