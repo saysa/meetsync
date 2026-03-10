@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Application\Query;
 
-final class GetMyReservationsQuery
+final readonly class GetMyReservationsQuery
 {
     public function __construct(
-        public readonly string $organizerId,
+        public string $organizerId,
     ) {}
 }
