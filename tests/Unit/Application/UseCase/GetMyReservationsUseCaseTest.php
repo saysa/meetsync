@@ -30,6 +30,46 @@ final class GetMyReservationsUseCaseTest extends TestCase
         };
     }
 
+    private function aFutureReservationForAlice(): Reservation
+    {
+        return new Reservation(
+            id: new ReservationId('res-alice-1'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-09 14:00:00'),
+                new DateTimeImmutable('2026-03-09 15:00:00'),
+            ),
+        );
+    }
+
+    #[Test]
+    public function should_return_the_organizers_confirmed_future_reservation_when_they_have_exactly_one(): void
+    {
+        $reservation = $this->aFutureReservationForAlice();
+
+        $reservationRepository = new class ($reservation) implements ReservationRepositoryInterface {
+            public function __construct(private Reservation $reservation) {}
+
+            public function findByRoomId(RoomId $roomId): array { return []; }
+            public function findById(ReservationId $id): ?Reservation { return null; }
+            public function save(Reservation $reservation): void {}
+            public function findByOrganizerId(string $organizerId): array
+            {
+                return [$this->reservation];
+            }
+        };
+
+        $useCase = new GetMyReservationsUseCase(
+            reservationRepository: $reservationRepository,
+            clock: $this->fixedClock(),
+        );
+
+        $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
+
+        self::assertCount(1, $result);
+        self::assertSame($reservation, $result[0]);
+    }
+
     #[Test]
     public function should_return_an_empty_list_when_the_organizer_has_no_reservations(): void
     {
