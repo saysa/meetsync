@@ -110,6 +110,40 @@ final class GetMyReservationsUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function should_exclude_a_confirmed_reservation_whose_start_time_is_in_the_past(): void
+    {
+        $pastReservation = new Reservation(
+            id: new ReservationId('res-alice-past'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-05 09:00:00'),
+                new DateTimeImmutable('2026-03-05 10:00:00'),
+            ),
+        );
+
+        $reservationRepository = new class ($pastReservation) implements ReservationRepositoryInterface {
+            public function __construct(private Reservation $pastReservation) {}
+
+            public function findByRoomId(RoomId $roomId): array { return []; }
+            public function findById(ReservationId $id): ?Reservation { return null; }
+            public function save(Reservation $reservation): void {}
+            public function findByOrganizerId(string $organizerId): array
+            {
+                return [$this->pastReservation];
+            }
+        };
+
+        $useCase = new GetMyReservationsUseCase(
+            reservationRepository: $reservationRepository,
+            clock: $this->fixedClock(),
+        );
+
+        $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
+
+        self::assertSame([], $result);
+    }
+
+    #[Test]
     public function should_return_an_empty_list_when_the_organizer_has_no_reservations(): void
     {
         $reservationRepository = new class implements ReservationRepositoryInterface {
