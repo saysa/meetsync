@@ -24,7 +24,7 @@ final class CancelReservationUseCase
         if ($reservation === null) {
             throw new ReservationNotFoundException();
         }
-        if ($reservation->organizerId() !== $command->requesterId) {
+        if (!$reservation->isOrganizedBy($command->requesterId)) {
             throw new NotTheOrganizerException();
         }
         $reservation->cancel();

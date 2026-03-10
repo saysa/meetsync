@@ -14,9 +14,9 @@ final class Reservation
         private Timeslot $timeslot,
     ) {}
 
-    public function organizerId(): string
+    public function isOrganizedBy(string $requesterId): bool
     {
-        return $this->organizerId;
+        return $this->organizerId === $requesterId;
     }
 
     public function cancel(): void
