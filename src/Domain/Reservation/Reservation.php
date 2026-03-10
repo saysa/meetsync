@@ -14,6 +14,11 @@ final class Reservation
         private Timeslot $timeslot,
     ) {}
 
+    public function organizerId(): string
+    {
+        return $this->organizerId;
+    }
+
     public function cancel(): void
     {
         $this->cancelled = true;
