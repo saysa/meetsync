@@ -4,19 +4,6 @@ Note: Pass `--debug` to log test-framework output.
 Escaped mutants:
 ================
 
-1) /var/www/src/Domain/Reservation/Reservation.php:21    [M] GreaterThanOrEqualTo [ID] eb606263ef752fb35c7802f2df9f902b
-
-@@ @@
-
-     public function hasStarted(DateTimeImmutable $now): bool
-     {
--        return $now >= $this->timeslot->start;
-+        return $now > $this->timeslot->start;
-     }
-
-     public function isOrganizedBy(string $requesterId): bool
-
-
 Timed Out mutants:
 ==================
 
