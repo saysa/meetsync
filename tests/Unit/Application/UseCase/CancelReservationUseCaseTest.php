@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Application\UseCase;
 
 use App\Application\Command\CancelReservationCommand;
+use App\Application\Exception\ReservationNotFoundException;
 use App\Application\UseCase\CancelReservationUseCase;
 use App\Domain\Clock\ClockInterface;
 use App\Domain\Reservation\Reservation;
@@ -79,5 +80,37 @@ final class CancelReservationUseCaseTest extends TestCase
 
         self::assertNotNull($capturingRepository->saved);
         self::assertTrue($capturingRepository->saved->isCancelled());
+    }
+
+    #[Test]
+    public function should_reject_the_cancellation_when_the_reservation_does_not_exist(): void
+    {
+        $emptyRepository = new class implements ReservationRepositoryInterface {
+            public function findByRoomId(RoomId $roomId): array
+            {
+                return [];
+            }
+
+            public function findById(ReservationId $id): ?Reservation
+            {
+                return null;
+            }
+
+            public function save(Reservation $reservation): void {}
+        };
+
+        $useCase = new CancelReservationUseCase(
+            reservationRepository: $emptyRepository,
+            clock: $this->fixedClock(),
+        );
+
+        $command = new CancelReservationCommand(
+            reservationId: 'unknown-id',
+            requesterId: 'alice',
+        );
+
+        $this->expectException(ReservationNotFoundException::class);
+
+        $useCase->execute($command);
     }
 }
