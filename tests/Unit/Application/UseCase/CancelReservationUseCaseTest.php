@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Application\UseCase;
 use App\Application\Command\CancelReservationCommand;
 use App\Application\Exception\ReservationNotFoundException;
 use App\Application\UseCase\CancelReservationUseCase;
+use App\Domain\Exception\NotTheOrganizerException;
 use App\Domain\Clock\ClockInterface;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
@@ -110,6 +111,51 @@ final class CancelReservationUseCaseTest extends TestCase
         );
 
         $this->expectException(ReservationNotFoundException::class);
+
+        $useCase->execute($command);
+    }
+
+    #[Test]
+    public function should_reject_the_cancellation_when_the_requester_is_not_the_organizer_of_the_reservation(): void
+    {
+        $reservation = new Reservation(
+            id: new ReservationId('res-1'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-09 14:00:00'),
+                new DateTimeImmutable('2026-03-09 15:00:00'),
+                new DateTimeImmutable('2026-03-09 08:00:00'),
+                new DateTimeImmutable('2026-03-09 19:00:00'),
+            ),
+        );
+
+        $repository = new class ($reservation) implements ReservationRepositoryInterface {
+            public function __construct(private Reservation $reservation) {}
+
+            public function findByRoomId(RoomId $roomId): array
+            {
+                return [];
+            }
+
+            public function findById(ReservationId $id): ?Reservation
+            {
+                return $this->reservation;
+            }
+
+            public function save(Reservation $reservation): void {}
+        };
+
+        $useCase = new CancelReservationUseCase(
+            reservationRepository: $repository,
+            clock: $this->fixedClock(),
+        );
+
+        $command = new CancelReservationCommand(
+            reservationId: 'res-1',
+            requesterId: 'bob',
+        );
+
+        $this->expectException(NotTheOrganizerException::class);
 
         $useCase->execute($command);
     }
