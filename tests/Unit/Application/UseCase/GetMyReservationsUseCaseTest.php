@@ -71,6 +71,45 @@ final class GetMyReservationsUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function should_exclude_reservations_that_belong_to_a_different_organizer(): void
+    {
+        $alicesReservation = $this->aFutureReservationForAlice();
+        $bobsReservation = new Reservation(
+            id: new ReservationId('res-bob-1'),
+            organizerId: 'bob',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-09 16:00:00'),
+                new DateTimeImmutable('2026-03-09 17:00:00'),
+            ),
+        );
+
+        $reservationRepository = new class ($alicesReservation, $bobsReservation) implements ReservationRepositoryInterface {
+            public function __construct(
+                private Reservation $alicesReservation,
+                private Reservation $bobsReservation,
+            ) {}
+
+            public function findByRoomId(RoomId $roomId): array { return []; }
+            public function findById(ReservationId $id): ?Reservation { return null; }
+            public function save(Reservation $reservation): void {}
+            public function findByOrganizerId(string $organizerId): array
+            {
+                return [$this->alicesReservation, $this->bobsReservation];
+            }
+        };
+
+        $useCase = new GetMyReservationsUseCase(
+            reservationRepository: $reservationRepository,
+            clock: $this->fixedClock(),
+        );
+
+        $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
+
+        self::assertCount(1, $result);
+        self::assertSame($alicesReservation, $result[0]);
+    }
+
+    #[Test]
     public function should_return_an_empty_list_when_the_organizer_has_no_reservations(): void
     {
         $reservationRepository = new class implements ReservationRepositoryInterface {
