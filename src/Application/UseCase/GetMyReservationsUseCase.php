@@ -21,9 +21,12 @@ final class GetMyReservationsUseCase
     {
         $reservations = $this->reservationRepository->findByOrganizerId($query->organizerId);
 
+        $now = $this->clock->now();
+
         return array_values(array_filter(
             $reservations,
-            fn(Reservation $r) => $r->isOrganizedBy($query->organizerId),
+            fn(Reservation $r) => $r->isOrganizedBy($query->organizerId)
+                && !$r->hasStarted($now),
         ));
     }
 }
