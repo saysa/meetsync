@@ -12,4 +12,7 @@ interface ReservationRepositoryInterface
     public function findById(ReservationId $id): ?Reservation;
 
     public function save(Reservation $reservation): void;
+
+    /** @return Reservation[] */
+    public function findByOrganizerId(string $organizerId): array;
 }

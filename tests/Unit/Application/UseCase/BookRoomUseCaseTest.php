@@ -44,6 +44,7 @@ final class BookRoomUseCaseTest extends TestCase
             public function findByRoomId(RoomId $roomId): array { return []; }
             public function findById(ReservationId $id): ?Reservation { return null; }
             public function save(Reservation $reservation): void {}
+            public function findByOrganizerId(string $organizerId): array { return []; }
         };
     }
 
@@ -111,6 +112,7 @@ final class BookRoomUseCaseTest extends TestCase
                 }
                 public function findById(ReservationId $id): ?Reservation { return null; }
                 public function save(Reservation $reservation): void {}
+                public function findByOrganizerId(string $organizerId): array { return []; }
             },
             clock: $this->fixedClock(),
         );
@@ -146,6 +148,7 @@ final class BookRoomUseCaseTest extends TestCase
                 }
                 public function findById(ReservationId $id): ?Reservation { return null; }
                 public function save(Reservation $reservation): void {}
+                public function findByOrganizerId(string $organizerId): array { return []; }
             },
             clock: $this->fixedClock(),
         );

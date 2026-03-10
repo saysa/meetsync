@@ -66,6 +66,8 @@ final class CancelReservationUseCaseTest extends TestCase
             {
                 $this->saved = $reservation;
             }
+
+            public function findByOrganizerId(string $organizerId): array { return []; }
         };
 
         $useCase = new CancelReservationUseCase(
@@ -99,6 +101,8 @@ final class CancelReservationUseCaseTest extends TestCase
             }
 
             public function save(Reservation $reservation): void {}
+
+            public function findByOrganizerId(string $organizerId): array { return []; }
         };
 
         $useCase = new CancelReservationUseCase(
@@ -144,6 +148,8 @@ final class CancelReservationUseCaseTest extends TestCase
             }
 
             public function save(Reservation $reservation): void {}
+
+            public function findByOrganizerId(string $organizerId): array { return []; }
         };
 
         $useCase = new CancelReservationUseCase(
@@ -189,6 +195,8 @@ final class CancelReservationUseCaseTest extends TestCase
             }
 
             public function save(Reservation $reservation): void {}
+
+            public function findByOrganizerId(string $organizerId): array { return []; }
         };
 
         $useCase = new CancelReservationUseCase(
@@ -234,6 +242,8 @@ final class CancelReservationUseCaseTest extends TestCase
             }
 
             public function save(Reservation $reservation): void {}
+
+            public function findByOrganizerId(string $organizerId): array { return []; }
         };
 
         $useCase = new CancelReservationUseCase(
