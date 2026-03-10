@@ -144,6 +144,35 @@ final class GetMyReservationsUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function should_include_a_cancelled_reservation_when_its_start_time_is_still_in_the_future(): void
+    {
+        $cancelledFutureReservation = $this->aFutureReservationForAlice();
+        $cancelledFutureReservation->cancel();
+
+        $reservationRepository = new class ($cancelledFutureReservation) implements ReservationRepositoryInterface {
+            public function __construct(private Reservation $reservation) {}
+
+            public function findByRoomId(RoomId $roomId): array { return []; }
+            public function findById(ReservationId $id): ?Reservation { return null; }
+            public function save(Reservation $reservation): void {}
+            public function findByOrganizerId(string $organizerId): array
+            {
+                return [$this->reservation];
+            }
+        };
+
+        $useCase = new GetMyReservationsUseCase(
+            reservationRepository: $reservationRepository,
+            clock: $this->fixedClock(),
+        );
+
+        $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
+
+        self::assertCount(1, $result);
+        self::assertSame($cancelledFutureReservation, $result[0]);
+    }
+
+    #[Test]
     public function should_return_an_empty_list_when_the_organizer_has_no_reservations(): void
     {
         $reservationRepository = new class implements ReservationRepositoryInterface {
