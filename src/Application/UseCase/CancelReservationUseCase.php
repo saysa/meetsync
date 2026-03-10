@@ -8,6 +8,7 @@ use App\Application\Command\CancelReservationCommand;
 use App\Application\Exception\ReservationNotFoundException;
 use App\Domain\Clock\ClockInterface;
 use App\Domain\Exception\NotTheOrganizerException;
+use App\Domain\Exception\ReservationAlreadyStartedException;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 
@@ -26,6 +27,9 @@ final class CancelReservationUseCase
         }
         if (!$reservation->isOrganizedBy($command->requesterId)) {
             throw new NotTheOrganizerException();
+        }
+        if ($reservation->hasStarted($this->clock->now())) {
+            throw new ReservationAlreadyStartedException();
         }
         $reservation->cancel();
         $this->reservationRepository->save($reservation);

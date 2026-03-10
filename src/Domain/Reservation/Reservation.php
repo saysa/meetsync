@@ -14,6 +14,11 @@ final class Reservation
         private Timeslot $timeslot,
     ) {}
 
+    public function hasStarted(\DateTimeImmutable $now): bool
+    {
+        return $now >= $this->timeslot->start;
+    }
+
     public function isOrganizedBy(string $requesterId): bool
     {
         return $this->organizerId === $requesterId;
