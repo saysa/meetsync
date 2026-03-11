@@ -13,5 +13,6 @@ final readonly class BookRoomCommand
         public DateTimeImmutable $start,
         public DateTimeImmutable $end,
         public int $participantCount,
+        public string $organizerEmail = '',
     ) {}
 }

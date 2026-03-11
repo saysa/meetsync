@@ -11,6 +11,7 @@ use App\Domain\Exception\BookingHorizonExceededException;
 use App\Domain\Exception\InsufficientAdvanceNoticeException;
 use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
+use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\RoomId;
@@ -25,6 +26,7 @@ final class BookRoomUseCase
         private RoomRepositoryInterface $roomRepository,
         private ReservationRepositoryInterface $reservationRepository,
         private ClockInterface $clock,
+        private ?EmailNotifierInterface $emailNotifier = null,
     ) {}
 
     public function execute(BookRoomCommand $command): ReservationId
