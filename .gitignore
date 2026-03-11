@@ -21,3 +21,4 @@ test_db_data/
 /.idea/
 
 infection/
+infection.log

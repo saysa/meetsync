@@ -3,8 +3,8 @@
 **Domain:** MeetSync — Enterprise Meeting Room Reservation
 **Scope:** Big Picture
 **Date:** 2026-03-06
-**Input:** `/event-storming big-picture: the entire MeetSync platform based on meetsync-refined-spec.md`
-**Source:** Greenfield project — domain grounded in `meetsync-refined-spec.md`
+**Input:** `/event-storming big-picture: the entire MeetSync platform based on docs/meetsync-refined-spec.md`
+**Source:** Greenfield project — domain grounded in `docs/meetsync-refined-spec.md`
 
 ---
 
