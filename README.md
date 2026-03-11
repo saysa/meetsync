@@ -1,3 +1,102 @@
+# MeetSync — Enterprise Meeting Room Reservation
+
+> SaaS platform for managing meeting room reservations across large multi-tenant organisations.
+
+---
+
+## Architecture & Methodology
+
+> "AI without discipline creates technical debt faster."
+
+**TDD — strict baby-steps discipline**
+RED → GREEN → REFACTOR, one test at a time. Each step is a separate commit.
+Test ordering follows TPP (Transformation Priority Premise). Test names follow FLFI (Final Label, First Implementation) — business language only, no technical terms.
+
+**Hexagonal Architecture (Ports & Adapters)**
+The domain core has zero dependencies on frameworks or infrastructure.
+Bounded Contexts map directly to `src/Domain/` sub-namespaces (Screaming Architecture).
+Application layer orchestrates use cases via Commands and Queries (CQRS).
+
+**DDD**
+Aggregates enforce invariants. Value Objects are immutable and self-validating.
+Repositories are domain ports — no Doctrine leaking into the domain.
+
+**Methodology pipeline**
+```
+Event Storming → BDD (Three Amigos) → tdd-analyze (TPP test list) → TDD cycles → Mutation Testing
+```
+
+---
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Language | PHP 8.4 |
+| Framework | Symfony 7 LTS |
+| Database | PostgreSQL |
+| Tests | PHPUnit 12 |
+| Mutation Testing | Infection (target: ≥ 95% MSI) |
+| Static Analysis | PHPStan Level 8 |
+| Runtime | Docker (PHP-FPM + Nginx) |
+
+---
+
+## Run tests
+
+```bash
+make test           # full test suite (spins up Docker + PostgreSQL)
+make test-coverage  # test suite + HTML coverage report (pcov)
+make shell          # open a shell in the app container
+```
+
+---
+
+## Project structure
+
+```
+src/
+├── Domain/
+│   ├── Clock/
+│   │   └── ClockInterface.php          # port — time abstraction
+│   ├── Exception/
+│   │   ├── DomainException.php
+│   │   ├── BookingHorizonExceededException.php
+│   │   ├── InsufficientAdvanceNoticeException.php
+│   │   ├── InvalidTimeslotException.php
+│   │   ├── NotTheOrganizerException.php
+│   │   ├── ReservationAlreadyStartedException.php
+│   │   ├── RoomCapacityExceededException.php
+│   │   └── TimeslotConflictException.php
+│   └── Reservation/
+│       ├── Reservation.php             # aggregate
+│       ├── ReservationId.php           # value object
+│       ├── ReservationRepositoryInterface.php
+│       ├── Room.php                    # value object
+│       ├── RoomId.php                  # value object
+│       ├── RoomRepositoryInterface.php
+│       └── Timeslot.php                # value object
+├── Application/
+│   ├── Command/
+│   │   ├── BookRoomCommand.php
+│   │   └── CancelReservationCommand.php
+│   ├── Exception/
+│   │   ├── ApplicationException.php
+│   │   ├── ReservationNotFoundException.php
+│   │   └── RoomNotFoundException.php
+│   ├── Query/
+│   │   └── GetMyReservationsQuery.php
+│   └── UseCase/
+│       ├── BookRoomUseCase.php
+│       ├── CancelReservationUseCase.php
+│       └── GetMyReservationsUseCase.php
+└── Controller/                         # (pending — HTTP adapters not yet implemented)
+```
+
+---
+
+## Business Specification
+
 # SPEC – MeetSync: Enterprise Meeting Room Reservation
 
 ## Introduction – MeetSync
