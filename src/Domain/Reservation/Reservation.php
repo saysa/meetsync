@@ -16,6 +16,11 @@ final class Reservation
         private Timeslot $timeslot,
     ) {}
 
+    public function startsAt(): DateTimeImmutable
+    {
+        return $this->timeslot->start;
+    }
+
     public function hasStarted(DateTimeImmutable $now): bool
     {
         return $now >= $this->timeslot->start;

@@ -23,10 +23,14 @@ final class GetMyReservationsUseCase
 
         $now = $this->clock->now();
 
-        return array_values(array_filter(
+        $filtered = array_values(array_filter(
             $reservations,
             fn(Reservation $r) => $r->isOrganizedBy($query->organizerId)
                 && !$r->hasStarted($now),
         ));
+
+        usort($filtered, fn(Reservation $a, Reservation $b) => $a->startsAt() <=> $b->startsAt());
+
+        return $filtered;
     }
 }
