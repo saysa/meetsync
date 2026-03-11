@@ -221,6 +221,62 @@ final class GetMyReservationsUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function should_return_a_contiguous_list_when_some_reservations_are_filtered_out(): void
+    {
+        $pastReservation = new Reservation(
+            id: new ReservationId('res-past'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-05 09:00:00'),
+                new DateTimeImmutable('2026-03-05 10:00:00'),
+            ),
+        );
+        $futureReservationA = new Reservation(
+            id: new ReservationId('res-future-a'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-09 14:00:00'),
+                new DateTimeImmutable('2026-03-09 15:00:00'),
+            ),
+        );
+        $futureReservationB = new Reservation(
+            id: new ReservationId('res-future-b'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-10 10:00:00'),
+                new DateTimeImmutable('2026-03-10 11:00:00'),
+            ),
+        );
+
+        // Repository returns past first (index 0), then two future ones (index 1, 2)
+        // Without array_values(), result keys after filter would be [1, 2] — not contiguous
+        $reservationRepository = new class ($pastReservation, $futureReservationA, $futureReservationB) implements ReservationRepositoryInterface {
+            public function __construct(
+                private Reservation $past,
+                private Reservation $futureA,
+                private Reservation $futureB,
+            ) {}
+
+            public function findByRoomId(RoomId $roomId): array { return []; }
+            public function findById(ReservationId $id): ?Reservation { return null; }
+            public function save(Reservation $reservation): void {}
+            public function findByOrganizerId(string $organizerId): array
+            {
+                return [$this->past, $this->futureA, $this->futureB];
+            }
+        };
+
+        $useCase = new GetMyReservationsUseCase(
+            reservationRepository: $reservationRepository,
+            clock: $this->fixedClock(),
+        );
+
+        $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
+
+        self::assertSame([0, 1], array_keys($result));
+    }
+
+    #[Test]
     public function should_return_an_empty_list_when_the_organizer_has_no_reservations(): void
     {
         $reservationRepository = new class implements ReservationRepositoryInterface {
