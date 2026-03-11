@@ -27,7 +27,7 @@
 | 3 | ✅ DONE | should exclude reservations that belong to a different organizer |
 | 4 | ✅ DONE | should exclude a confirmed reservation whose start time is in the past |
 | 5 | ✅ DONE | should include a cancelled reservation when its start time is still in the future |
-| 6 | NOT DONE | should return multiple reservations ordered chronologically by start time when the organizer has several future ones |
+| 6 | ✅ DONE | should return multiple reservations ordered chronologically by start time when the organizer has several future ones |
 
 ---
 
