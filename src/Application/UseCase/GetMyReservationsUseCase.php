@@ -29,7 +29,7 @@ final class GetMyReservationsUseCase
                 && !$r->hasStarted($now),
         ));
 
-        usort($filtered, fn(Reservation $a, Reservation $b) => $a->startsAt() <=> $b->startsAt());
+        usort($filtered, fn(Reservation $a, Reservation $b) => $a->compareStartTimeTo($b));
 
         return $filtered;
     }
