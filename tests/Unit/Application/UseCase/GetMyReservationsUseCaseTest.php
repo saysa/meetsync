@@ -173,6 +173,54 @@ final class GetMyReservationsUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function should_return_reservations_ordered_chronologically_by_start_time_when_the_organizer_has_several_future_ones(): void
+    {
+        $reservationToday = new Reservation(
+            id: new ReservationId('res-1'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-09 14:00:00'),
+                new DateTimeImmutable('2026-03-09 15:00:00'),
+            ),
+        );
+        $reservationTomorrow = new Reservation(
+            id: new ReservationId('res-2'),
+            organizerId: 'alice',
+            timeslot: new Timeslot(
+                new DateTimeImmutable('2026-03-10 10:00:00'),
+                new DateTimeImmutable('2026-03-10 11:00:00'),
+            ),
+        );
+
+        // Repository returns them in REVERSE order to force the sort
+        $reservationRepository = new class ($reservationTomorrow, $reservationToday) implements ReservationRepositoryInterface {
+            public function __construct(
+                private Reservation $reservationTomorrow,
+                private Reservation $reservationToday,
+            ) {}
+
+            public function findByRoomId(RoomId $roomId): array { return []; }
+            public function findById(ReservationId $id): ?Reservation { return null; }
+            public function save(Reservation $reservation): void {}
+            public function findByOrganizerId(string $organizerId): array
+            {
+                return [$this->reservationTomorrow, $this->reservationToday];
+            }
+        };
+
+        $useCase = new GetMyReservationsUseCase(
+            reservationRepository: $reservationRepository,
+            clock: $this->fixedClock(),
+        );
+
+        $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
+
+        self::assertCount(2, $result);
+        self::assertSame($reservationToday, $result[0]);
+        self::assertSame($reservationTomorrow, $result[1]);
+    }
+
+    #[Test]
     public function should_return_an_empty_list_when_the_organizer_has_no_reservations(): void
     {
         $reservationRepository = new class implements ReservationRepositoryInterface {
