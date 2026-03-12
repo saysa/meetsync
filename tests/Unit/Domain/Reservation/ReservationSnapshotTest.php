@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 final class ReservationSnapshotTest extends TestCase
 {
     #[Test]
-    public function should_expose_a_snapshot_with_the_correct_organizer_identifier_confirmed_status_timeslot_start_and_timeslot_end_when_a_reservation_is_created_via_the_named_constructor(): void
+    public function should_record_the_organizer_the_booked_room_a_confirmed_status_and_the_reserved_time_window_when_a_booking_is_created(): void
     {
         $start = new DateTimeImmutable('2026-03-20 10:00:00');
         $end   = new DateTimeImmutable('2026-03-20 11:00:00');
@@ -31,6 +31,7 @@ final class ReservationSnapshotTest extends TestCase
         $snapshot = $reservation->toSnapshot();
 
         self::assertInstanceOf(ReservationSnapshot::class, $snapshot);
+        self::assertSame('eiffel', $snapshot->roomId);
         self::assertSame('alice@example.com', $snapshot->organizerId);
         self::assertSame('CONFIRMED', $snapshot->status);
         self::assertSame($start, $snapshot->start);
