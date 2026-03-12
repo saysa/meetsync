@@ -8,7 +8,10 @@ use DateTimeImmutable;
 
 final class Reservation
 {
+    private const string STATUS_CONFIRMED = 'CONFIRMED';
+
     private bool $cancelled = false;
+    private string $roomId = '';
 
     public function __construct(
         private ReservationId $id,
@@ -22,16 +25,18 @@ final class Reservation
         string $organizerId,
         Timeslot $timeslot,
     ): self {
-        return new self($id, $organizerId, $timeslot);
+        $reservation = new self($id, $organizerId, $timeslot);
+        $reservation->roomId = $roomId->value;
+        return $reservation;
     }
 
     public function toSnapshot(): ReservationSnapshot
     {
         return new ReservationSnapshot(
             id: $this->id->value,
-            roomId: '',
+            roomId: $this->roomId,
             organizerId: $this->organizerId,
-            status: '',
+            status: self::STATUS_CONFIRMED,
             start: $this->timeslot->start,
             end: $this->timeslot->end,
         );
