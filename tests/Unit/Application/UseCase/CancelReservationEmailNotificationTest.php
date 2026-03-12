@@ -163,4 +163,63 @@ final class CancelReservationEmailNotificationTest extends TestCase
 
         self::assertNull($spy->cancellationSentTo);
     }
+
+    #[Test]
+    public function should_cancel_the_reservation_when_the_notification_cannot_be_delivered(): void
+    {
+        $failingNotifier = new class implements EmailNotifierInterface {
+            public function sendConfirmation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {}
+
+            public function sendCancellation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {
+                throw new \RuntimeException('SMTP unreachable');
+            }
+        };
+
+        $capturingRepository = new class ($this->aliceConfirmedReservation()) implements ReservationRepositoryInterface {
+            public ?Reservation $saved = null;
+
+            public function __construct(private Reservation $reservation) {}
+
+            public function findByRoomId(RoomId $roomId): array { return []; }
+
+            public function findById(ReservationId $id): ?Reservation
+            {
+                return $this->reservation;
+            }
+
+            public function save(Reservation $reservation): void
+            {
+                $this->saved = $reservation;
+            }
+
+            public function findByOrganizerId(string $organizerId): array { return []; }
+        };
+
+        $useCase = new CancelReservationUseCase(
+            reservationRepository: $capturingRepository,
+            clock: $this->fixedClock(),
+            emailNotifier: $failingNotifier,
+        );
+
+        $command = new CancelReservationCommand(
+            reservationId: 'res-1',
+            requesterId: 'alice',
+            requesterEmail: 'alice@example.com',
+        );
+
+        $useCase->execute($command);
+
+        self::assertNotNull($capturingRepository->saved);
+        self::assertTrue($capturingRepository->saved->isCancelled());
+    }
 }
