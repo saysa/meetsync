@@ -67,16 +67,6 @@ final class Reservation
         return $this->cancelled;
     }
 
-    public function timeslotStart(): DateTimeImmutable
-    {
-        return $this->timeslot->start;
-    }
-
-    public function timeslotEnd(): DateTimeImmutable
-    {
-        return $this->timeslot->end;
-    }
-
     public function conflictsWith(Timeslot $other): bool
     {
         return $this->timeslot->conflictsWith($other);
