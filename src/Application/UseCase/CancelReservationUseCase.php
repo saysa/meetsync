@@ -35,5 +35,12 @@ final class CancelReservationUseCase
         }
         $reservation->cancel();
         $this->reservationRepository->save($reservation);
+
+        $this->emailNotifier->sendCancellation(
+            $command->requesterEmail,
+            $command->reservationId,
+            new \DateTimeImmutable(),
+            new \DateTimeImmutable(),
+        );
     }
 }
