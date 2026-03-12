@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Application\UseCase;
 use App\Application\Command\CancelReservationCommand;
 use App\Application\UseCase\CancelReservationUseCase;
 use App\Domain\Clock\ClockInterface;
+use App\Domain\Exception\NotTheOrganizerException;
 use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
@@ -120,5 +121,46 @@ final class CancelReservationEmailNotificationTest extends TestCase
         $useCase->execute($command);
 
         self::assertSame('alice@example.com', $spy->cancellationSentTo);
+    }
+
+    #[Test]
+    public function should_not_send_any_cancellation_email_when_the_cancellation_is_rejected_because_the_requester_is_not_the_organizer(): void
+    {
+        $spy = new class implements EmailNotifierInterface {
+            public ?string $cancellationSentTo = null;
+
+            public function sendConfirmation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {}
+
+            public function sendCancellation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {
+                $this->cancellationSentTo = $organizerEmail;
+            }
+        };
+
+        $useCase = new CancelReservationUseCase(
+            reservationRepository: $this->reservationRepository($this->aliceConfirmedReservation()),
+            clock: $this->fixedClock(),
+            emailNotifier: $spy,
+        );
+
+        $command = new CancelReservationCommand(
+            reservationId: 'res-1',
+            requesterId: 'bob',
+            requesterEmail: 'bob@example.com',
+        );
+
+        $this->expectException(NotTheOrganizerException::class);
+        $useCase->execute($command);
+
+        self::assertNull($spy->cancellationSentTo);
     }
 }
