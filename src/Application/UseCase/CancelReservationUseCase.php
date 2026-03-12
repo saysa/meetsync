@@ -39,8 +39,8 @@ final class CancelReservationUseCase
         $this->emailNotifier->sendCancellation(
             $command->requesterEmail,
             $command->reservationId,
-            new \DateTimeImmutable(),
-            new \DateTimeImmutable(),
+            $reservation->timeslotStart(),
+            $reservation->timeslotEnd(),
         );
     }
 }
