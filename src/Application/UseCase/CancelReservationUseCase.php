@@ -36,11 +36,14 @@ final class CancelReservationUseCase
         $reservation->cancel();
         $this->reservationRepository->save($reservation);
 
-        $this->emailNotifier->sendCancellation(
-            $command->requesterEmail,
-            $command->reservationId,
-            $reservation->timeslotStart(),
-            $reservation->timeslotEnd(),
-        );
+        try {
+            $this->emailNotifier->sendCancellation(
+                $command->requesterEmail,
+                $command->reservationId,
+                $reservation->timeslotStart(),
+                $reservation->timeslotEnd(),
+            );
+        } catch (\Throwable) {
+        }
     }
 }
