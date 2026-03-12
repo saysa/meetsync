@@ -172,4 +172,47 @@ final class BookRoomEmailNotificationTest extends TestCase
 
         self::assertNull($spy->confirmationSentTo);
     }
+
+    #[Test]
+    public function should_confirm_the_reservation_when_the_notification_cannot_be_delivered(): void
+    {
+        $failingNotifier = new class implements EmailNotifierInterface {
+            public function sendConfirmation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {
+                throw new \RuntimeException('SMTP unreachable');
+            }
+
+            public function sendCancellation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {
+                throw new \RuntimeException('SMTP unreachable');
+            }
+        };
+
+        $useCase = new BookRoomUseCase(
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: $this->emptyReservationRepository(),
+            clock: $this->fixedClock(),
+            emailNotifier: $failingNotifier,
+        );
+
+        $command = new BookRoomCommand(
+            roomId: 'eiffel',
+            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+            participantCount: 3,
+            organizerEmail: 'alice@example.com',
+        );
+
+        $reservationId = $useCase->execute($command);
+
+        self::assertNotNull($reservationId);
+    }
 }
