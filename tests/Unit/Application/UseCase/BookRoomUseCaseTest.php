@@ -13,6 +13,7 @@ use App\Domain\Exception\InsufficientAdvanceNoticeException;
 use App\Domain\Exception\InvalidTimeslotException;
 use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
+use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\ReservationId;
@@ -69,6 +70,25 @@ final class BookRoomUseCaseTest extends TestCase
         );
     }
 
+    private function noOpEmailNotifier(): EmailNotifierInterface
+    {
+        return new class implements EmailNotifierInterface {
+            public function sendConfirmation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {}
+
+            public function sendCancellation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {}
+        };
+    }
+
     #[Test]
     public function should_create_a_confirmed_reservation_when_a_room_is_available_and_all_booking_rules_are_satisfied(): void
     {
@@ -76,6 +96,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
         $command = new BookRoomCommand(
             roomId: 'eiffel',
@@ -115,6 +136,7 @@ final class BookRoomUseCaseTest extends TestCase
                 public function findByOrganizerId(string $organizerId): array { return []; }
             },
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -151,6 +173,7 @@ final class BookRoomUseCaseTest extends TestCase
                 public function findByOrganizerId(string $organizerId): array { return []; }
             },
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -172,6 +195,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -195,6 +219,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -216,6 +241,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -237,6 +263,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -267,6 +294,7 @@ final class BookRoomUseCaseTest extends TestCase
             },
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -295,6 +323,7 @@ final class BookRoomUseCaseTest extends TestCase
             },
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -318,6 +347,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -337,6 +367,7 @@ final class BookRoomUseCaseTest extends TestCase
             roomRepository: $this->roomRepository($this->eiffelRoom()),
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
@@ -365,6 +396,7 @@ final class BookRoomUseCaseTest extends TestCase
             },
             reservationRepository: $this->emptyReservationRepository(),
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new BookRoomCommand(
