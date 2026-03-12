@@ -45,14 +45,14 @@ Test 6 is the regression guard: making the constructor `private` will break all 
 
 | # | Status | Test |
 |---|---|---|
-| 1 | ✅ DONE | should expose a snapshot with the correct organizer identifier, confirmed status, timeslot start, and timeslot end when a reservation is created via the named constructor |
-| 2 | ☐ | should reconstruct a reservation with identical organizer, status, and timeslot data when a snapshot is round-tripped through fromSnapshot |
-| 3 | ☐ | should persist a confirmed reservation carrying the correct room identifier and organizer identifier when all booking rules are satisfied |
-| 4 | ☐ | should not persist any reservation when the booking is rejected because the requested timeslot conflicts with an existing one |
-| 5 | ☐ | should assign a distinct reservation identifier to each new booking when the same room is booked for two non-overlapping timeslots |
-| 6 | ☐ | should expose a complete snapshot — including room identifier — and allow full reconstitution via fromSnapshot when a reservation's constructor is accessible only through the named constructor |
-| 7 | ☐ | should expose a snapshot with the correct capacity, opening time, and closing time when a room's data is serialised |
-| 8 | ☐ | should reconstruct a room with identical capacity and operating hours when a room snapshot is round-tripped through fromSnapshot |
+| 1 | ✅ DONE | should record the organizer, the booked room, a confirmed status, and the reserved time window when a booking is created |
+| 2 | ☐ | should restore all booking details — organizer, room, confirmed status, and reserved time window — when a reservation is loaded from the system's records |
+| 3 | ☐ | should save the confirmed booking with the organizer and room details when a room is successfully reserved for an available time slot |
+| 4 | ☐ | should not save any booking when the reservation is refused because the room is already taken for that time slot |
+| 5 | ☐ | should give each booking a unique reference number when the same room is reserved twice for two different time slots |
+| 6 | ☐ | should enforce booking rules correctly against a reservation that already exists in the system |
+| 7 | ☐ | should record the room capacity and operating hours when a room is saved |
+| 8 | ☐ | should preserve the room capacity and operating hours when a room is saved and loaded back |
 
 ---
 
@@ -61,13 +61,13 @@ Test 6 is the regression guard: making the constructor `private` will break all 
 | # | TPP | Contradiction introduced |
 |---|---|---|
 | 1 | nil → constant (2) | Baseline — establishes `ReservationSnapshot`, `Reservation::create()`, `toSnapshot()` |
-| 2 | constant → variable (3) | Hard-coded snapshot cannot survive a round-trip — forces all fields wired to real instance state |
+| 2 | constant → variable (3) | Hard-coded fields in `toSnapshot()` cannot survive a load round-trip — forces `fromSnapshot()` to wire every field (including `roomId`) to real instance state |
 | 3 | unconditional → conditional (4) | Use case never calls `save()` — capturing fake fails immediately; forces `Reservation::create()` + `save()` on happy path |
-| 4 | unconditional → conditional (4) | Naive always-save fails on rejection — forces `save()` placed only after all guards pass |
+| 4 | unconditional → conditional (4) | Naive always-save fails on rejection — forces `save()` only after all guards pass |
 | 5 | constant → variable (3) | Hardcoded `ReservationId` makes all bookings identical — forces unique ID generation |
-| 6 | unconditional → conditional (4) | Making constructor `private` breaks all `new Reservation(...)` inline fakes — forces migration to `fromSnapshot()` in all existing tests |
+| 6 | unconditional → conditional (4) | Making constructor `private` breaks all `new Reservation(...)` inline fakes — forces migration to `fromSnapshot()` |
 | 7 | nil → constant (2) | Baseline — establishes `RoomSnapshot`, `Room::toSnapshot()` |
-| 8 | constant → variable (3) | Hard-coded snapshot cannot survive round-trip — forces all fields wired to real Room state |
+| 8 | constant → variable (3) | Hard-coded fields cannot survive round-trip — forces all Room fields wired to real state |
 
 ---
 
