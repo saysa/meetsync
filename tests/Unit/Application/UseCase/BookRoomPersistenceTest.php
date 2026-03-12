@@ -23,8 +23,7 @@ final class BookRoomPersistenceTest extends TestCase
     #[Test]
     public function should_save_the_confirmed_booking_with_the_organizer_and_room_details_when_a_room_is_successfully_reserved_for_an_available_time_slot(): void
     {
-        $captured = null;
-        $capturingRepository = new class ($captured) implements ReservationRepositoryInterface {
+        $capturingRepository = new class implements ReservationRepositoryInterface {
             public ?Reservation $saved = null;
 
             public function findByRoomId(RoomId $roomId): array { return []; }
