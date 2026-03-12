@@ -53,7 +53,7 @@ Test 4 forces `requesterEmail` to be added to `CancelReservationCommand`.
 | 3 | ✅ DONE | should confirm the reservation when the notification cannot be delivered |
 | 4 | ✅ DONE | should send a cancellation email to the organizer when a reservation is successfully cancelled |
 | 5 | ✅ DONE | should not send any cancellation email when the cancellation is rejected because the requester is not the organizer |
-| 6 | NOT DONE | should cancel the reservation when the notification cannot be delivered |
+| 6 | ✅ DONE | should cancel the reservation when the notification cannot be delivered |
 
 ---
 
