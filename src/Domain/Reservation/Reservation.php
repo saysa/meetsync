@@ -9,6 +9,7 @@ use DateTimeImmutable;
 final class Reservation
 {
     private const string STATUS_CONFIRMED = 'CONFIRMED';
+    private const string STATUS_CANCELLED = 'CANCELLED';
 
     private bool $cancelled = false;
     private string $roomId = '';
@@ -38,7 +39,7 @@ final class Reservation
             new Timeslot($snapshot->start, $snapshot->end),
         );
         $reservation->roomId = $snapshot->roomId;
-        $reservation->cancelled = $snapshot->status === 'CANCELLED';
+        $reservation->cancelled = $snapshot->status === self::STATUS_CANCELLED;
         return $reservation;
     }
 
@@ -48,7 +49,7 @@ final class Reservation
             id: $this->id->value,
             roomId: $this->roomId,
             organizerId: $this->organizerId,
-            status: self::STATUS_CONFIRMED,
+            status: $this->cancelled ? self::STATUS_CANCELLED : self::STATUS_CONFIRMED,
             start: $this->timeslot->start,
             end: $this->timeslot->end,
         );
