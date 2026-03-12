@@ -45,7 +45,7 @@ Test 6 is the regression guard: making the constructor `private` will break all 
 
 | # | Status | Test |
 |---|---|---|
-| 1 | ☐ | should expose a snapshot with the correct organizer identifier, confirmed status, timeslot start, and timeslot end when a reservation is created via the named constructor |
+| 1 | ✅ DONE | should expose a snapshot with the correct organizer identifier, confirmed status, timeslot start, and timeslot end when a reservation is created via the named constructor |
 | 2 | ☐ | should reconstruct a reservation with identical organizer, status, and timeslot data when a snapshot is round-tripped through fromSnapshot |
 | 3 | ☐ | should persist a confirmed reservation carrying the correct room identifier and organizer identifier when all booking rules are satisfied |
 | 4 | ☐ | should not persist any reservation when the booking is rejected because the requested timeslot conflicts with an existing one |
