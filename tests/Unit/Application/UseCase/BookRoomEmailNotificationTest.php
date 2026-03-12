@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Application\UseCase;
 use App\Application\Command\BookRoomCommand;
 use App\Application\UseCase\BookRoomUseCase;
 use App\Domain\Clock\ClockInterface;
+use App\Domain\Exception\TimeslotConflictException;
 use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
@@ -14,6 +15,7 @@ use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\Room;
 use App\Domain\Reservation\RoomId;
 use App\Domain\Reservation\RoomRepositoryInterface;
+use App\Domain\Reservation\Timeslot;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -104,5 +106,70 @@ final class BookRoomEmailNotificationTest extends TestCase
         $useCase->execute($command);
 
         self::assertSame('alice@example.com', $spy->confirmationSentTo);
+    }
+
+    #[Test]
+    public function should_not_send_a_confirmation_email_when_the_booking_fails_because_the_room_is_already_taken(): void
+    {
+        $spy = new class implements EmailNotifierInterface {
+            public ?string $confirmationSentTo = null;
+
+            public function sendConfirmation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {
+                $this->confirmationSentTo = $organizerEmail;
+            }
+
+            public function sendCancellation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {}
+        };
+
+        $useCase = new BookRoomUseCase(
+            roomRepository: $this->roomRepository($this->eiffelRoom()),
+            reservationRepository: new class implements ReservationRepositoryInterface {
+                public function findByRoomId(RoomId $roomId): array
+                {
+                    return [
+                        new Reservation(
+                            id: new ReservationId('res-existing'),
+                            organizerId: 'bob',
+                            timeslot: new Timeslot(
+                                new DateTimeImmutable('2026-03-09 14:00:00'),
+                                new DateTimeImmutable('2026-03-09 15:00:00'),
+                            ),
+                        ),
+                    ];
+                }
+                public function findById(ReservationId $id): ?Reservation { return null; }
+                public function save(Reservation $reservation): void {}
+                public function findByOrganizerId(string $organizerId): array { return []; }
+            },
+            clock: $this->fixedClock(),
+            emailNotifier: $spy,
+        );
+
+        $command = new BookRoomCommand(
+            roomId: 'eiffel',
+            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+            participantCount: 3,
+            organizerEmail: 'alice@example.com',
+        );
+
+        try {
+            $useCase->execute($command);
+            self::fail('Expected TimeslotConflictException was not thrown');
+        } catch (TimeslotConflictException) {
+            // expected
+        }
+
+        self::assertNull($spy->confirmationSentTo);
     }
 }
