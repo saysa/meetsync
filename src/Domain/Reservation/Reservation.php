@@ -32,7 +32,14 @@ final class Reservation
 
     public static function fromSnapshot(ReservationSnapshot $snapshot): self
     {
-        return new self(new ReservationId(''), '', new Timeslot($snapshot->start, $snapshot->end));
+        $reservation = new self(
+            new ReservationId($snapshot->id),
+            $snapshot->organizerId,
+            new Timeslot($snapshot->start, $snapshot->end),
+        );
+        $reservation->roomId = $snapshot->roomId;
+        $reservation->cancelled = $snapshot->status === 'CANCELLED';
+        return $reservation;
     }
 
     public function toSnapshot(): ReservationSnapshot
