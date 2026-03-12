@@ -61,12 +61,16 @@ final class BookRoomUseCase
 
         $reservationId = new ReservationId('00000000-0000-0000-0000-000000000001');
 
-        $this->emailNotifier->sendConfirmation(
-            $command->organizerEmail,
-            $command->roomId,
-            $command->start,
-            $command->end,
-        );
+        try {
+            $this->emailNotifier->sendConfirmation(
+                $command->organizerEmail,
+                $command->roomId,
+                $command->start,
+                $command->end,
+            );
+        } catch (\Throwable) {
+            // Best-effort: notification failure must not abort the reservation
+        }
 
         return $reservationId;
     }
