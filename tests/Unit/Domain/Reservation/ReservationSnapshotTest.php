@@ -37,4 +37,24 @@ final class ReservationSnapshotTest extends TestCase
         self::assertSame($start, $snapshot->start);
         self::assertSame($end, $snapshot->end);
     }
+
+    #[Test]
+    public function should_restore_all_booking_details_organizer_room_confirmed_status_and_reserved_time_window_when_a_reservation_is_loaded_from_the_systems_records(): void
+    {
+        $start = new DateTimeImmutable('2026-03-20 14:00:00');
+        $end   = new DateTimeImmutable('2026-03-20 15:30:00');
+
+        $original = new ReservationSnapshot(
+            id: 'res-042',
+            roomId: 'louvre',
+            organizerId: 'bob@example.com',
+            status: 'CONFIRMED',
+            start: $start,
+            end: $end,
+        );
+
+        $restored = Reservation::fromSnapshot($original);
+
+        self::assertEquals($original, $restored->toSnapshot());
+    }
 }

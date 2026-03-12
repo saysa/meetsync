@@ -30,6 +30,11 @@ final class Reservation
         return $reservation;
     }
 
+    public static function fromSnapshot(ReservationSnapshot $snapshot): self
+    {
+        return new self(new ReservationId(''), '', new Timeslot($snapshot->start, $snapshot->end));
+    }
+
     public function toSnapshot(): ReservationSnapshot
     {
         return new ReservationSnapshot(
