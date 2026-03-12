@@ -44,7 +44,7 @@ composer-update: ## Run composer update in dev container
 
 .PHONY: deptrac
 deptrac: ## Check architecture layer dependencies (Hexagonal Architecture)
-	$(APP_DEV) vendor/bin/deptrac analyse --config-file=deptrac.yaml
+	$(APP_DEV) php -d error_reporting=0 vendor/bin/deptrac analyse --config-file=deptrac.yaml
 
 ##@ Tests
 
