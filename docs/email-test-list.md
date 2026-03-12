@@ -48,7 +48,7 @@ Test 4 forces `requesterEmail` to be added to `CancelReservationCommand`.
 
 | # | Status | Test |
 |---|---|---|
-| 1 | NOT DONE | should send a confirmation email to the organizer when a room booking succeeds |
+| 1 | ✅ DONE | should send a confirmation email to the organizer when a room booking succeeds |
 | 2 | NOT DONE | should not send a confirmation email when the booking fails because the room is already taken |
 | 3 | NOT DONE | should confirm the reservation when the notification cannot be delivered |
 | 4 | NOT DONE | should send a cancellation email to the organizer when a reservation is successfully cancelled |
