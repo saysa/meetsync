@@ -9,5 +9,6 @@ final readonly class CancelReservationCommand
     public function __construct(
         public string $reservationId,
         public string $requesterId,
+        public string $requesterEmail = '',
     ) {}
 }

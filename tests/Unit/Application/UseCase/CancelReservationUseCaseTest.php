@@ -10,6 +10,7 @@ use App\Application\UseCase\CancelReservationUseCase;
 use App\Domain\Exception\NotTheOrganizerException;
 use App\Domain\Exception\ReservationAlreadyStartedException;
 use App\Domain\Clock\ClockInterface;
+use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
@@ -30,6 +31,25 @@ final class CancelReservationUseCaseTest extends TestCase
             {
                 return new DateTimeImmutable($this->now);
             }
+        };
+    }
+
+    private function noOpEmailNotifier(): EmailNotifierInterface
+    {
+        return new class implements EmailNotifierInterface {
+            public function sendConfirmation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {}
+
+            public function sendCancellation(
+                string $organizerEmail,
+                string $roomId,
+                DateTimeImmutable $start,
+                DateTimeImmutable $end,
+            ): void {}
         };
     }
 
@@ -73,6 +93,7 @@ final class CancelReservationUseCaseTest extends TestCase
         $useCase = new CancelReservationUseCase(
             reservationRepository: $capturingRepository,
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new CancelReservationCommand(
@@ -108,6 +129,7 @@ final class CancelReservationUseCaseTest extends TestCase
         $useCase = new CancelReservationUseCase(
             reservationRepository: $emptyRepository,
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new CancelReservationCommand(
@@ -155,6 +177,7 @@ final class CancelReservationUseCaseTest extends TestCase
         $useCase = new CancelReservationUseCase(
             reservationRepository: $repository,
             clock: $this->fixedClock(),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new CancelReservationCommand(
@@ -202,6 +225,7 @@ final class CancelReservationUseCaseTest extends TestCase
         $useCase = new CancelReservationUseCase(
             reservationRepository: $repository,
             clock: $this->fixedClock(now: '2026-03-09 14:30:00'),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new CancelReservationCommand(
@@ -249,6 +273,7 @@ final class CancelReservationUseCaseTest extends TestCase
         $useCase = new CancelReservationUseCase(
             reservationRepository: $repository,
             clock: $this->fixedClock(now: '2026-03-09 14:00:00'),
+            emailNotifier: $this->noOpEmailNotifier(),
         );
 
         $command = new CancelReservationCommand(

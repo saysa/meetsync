@@ -9,6 +9,7 @@ use App\Application\Exception\ReservationNotFoundException;
 use App\Domain\Clock\ClockInterface;
 use App\Domain\Exception\NotTheOrganizerException;
 use App\Domain\Exception\ReservationAlreadyStartedException;
+use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 
@@ -17,6 +18,7 @@ final class CancelReservationUseCase
     public function __construct(
         private readonly ReservationRepositoryInterface $reservationRepository,
         private readonly ClockInterface $clock,
+        private readonly EmailNotifierInterface $emailNotifier,
     ) {}
 
     public function execute(CancelReservationCommand $command): void
