@@ -23,10 +23,10 @@ final class BookRoomUseCase
     private const string MIN_ADVANCE_NOTICE = '+30 minutes';
 
     public function __construct(
-        private RoomRepositoryInterface $roomRepository,
-        private ReservationRepositoryInterface $reservationRepository,
-        private ClockInterface $clock,
-        private EmailNotifierInterface $emailNotifier,
+        private readonly RoomRepositoryInterface $roomRepository,
+        private readonly ReservationRepositoryInterface $reservationRepository,
+        private readonly ClockInterface $clock,
+        private readonly EmailNotifierInterface $emailNotifier,
     ) {}
 
     public function execute(BookRoomCommand $command): ReservationId
