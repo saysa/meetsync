@@ -59,6 +59,17 @@ final class BookRoomUseCase
             }
         }
 
-        return new ReservationId('00000000-0000-0000-0000-000000000001');
+        $reservationId = new ReservationId('00000000-0000-0000-0000-000000000001');
+
+        if ($this->emailNotifier !== null) {
+            $this->emailNotifier->sendConfirmation(
+                $command->organizerEmail,
+                $command->roomId,
+                $command->start,
+                $command->end,
+            );
+        }
+
+        return $reservationId;
     }
 }
