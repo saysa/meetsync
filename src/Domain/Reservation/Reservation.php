@@ -16,6 +16,27 @@ final class Reservation
         private Timeslot $timeslot,
     ) {}
 
+    public static function create(
+        ReservationId $id,
+        RoomId $roomId,
+        string $organizerId,
+        Timeslot $timeslot,
+    ): self {
+        return new self($id, $organizerId, $timeslot);
+    }
+
+    public function toSnapshot(): ReservationSnapshot
+    {
+        return new ReservationSnapshot(
+            id: $this->id->value,
+            roomId: '',
+            organizerId: $this->organizerId,
+            status: '',
+            start: $this->timeslot->start,
+            end: $this->timeslot->end,
+        );
+    }
+
     public function compareStartTimeTo(self $other): int
     {
         return $this->timeslot->start <=> $other->timeslot->start;
