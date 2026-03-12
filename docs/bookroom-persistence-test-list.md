@@ -46,7 +46,7 @@ Test 6 is the regression guard: making the constructor `private` will break all 
 | # | Status | Test |
 |---|---|---|
 | 1 | ✅ DONE | should record the organizer, the booked room, a confirmed status, and the reserved time window when a booking is created |
-| 2 | ☐ | should restore all booking details — organizer, room, confirmed status, and reserved time window — when a reservation is loaded from the system's records |
+| 2 | ✅ DONE | should restore all booking details — organizer, room, confirmed status, and reserved time window — when a reservation is loaded from the system's records |
 | 3 | ☐ | should save the confirmed booking with the organizer and room details when a room is successfully reserved for an available time slot |
 | 4 | ☐ | should not save any booking when the reservation is refused because the room is already taken for that time slot |
 | 5 | ☐ | should give each booking a unique reference number when the same room is reserved twice for two different time slots |
