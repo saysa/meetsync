@@ -12,6 +12,7 @@ use App\Domain\Exception\InsufficientAdvanceNoticeException;
 use App\Domain\Exception\RoomCapacityExceededException;
 use App\Domain\Exception\TimeslotConflictException;
 use App\Domain\Notification\EmailNotifierInterface;
+use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\RoomId;
@@ -60,6 +61,15 @@ final class BookRoomUseCase
         }
 
         $reservationId = new ReservationId('00000000-0000-0000-0000-000000000001');
+
+        $reservation = Reservation::create(
+            id: $reservationId,
+            roomId: $roomId,
+            organizerId: $command->organizerEmail,
+            timeslot: $newTimeslot,
+        );
+
+        $this->reservationRepository->save($reservation);
 
         try {
             $this->emailNotifier->sendConfirmation(
