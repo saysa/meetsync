@@ -1,0 +1,39 @@
+deptrac:
+  paths:
+    - src/
+
+  layers:
+    - name: Domain
+      collectors:
+        - type: directory
+          value: src/Domain/.*
+
+    - name: Application
+      collectors:
+        - type: directory
+          value: src/Application/.*
+
+    - name: Infrastructure
+      collectors:
+        - type: directory
+          value: src/Infrastructure/.*
+
+    - name: Controller
+      collectors:
+        - type: directory
+          value: src/Controller/.*
+
+  ruleset:
+    Domain:
+      # Domain has zero dependencies — it depends on nothing
+    Application:
+      - Domain
+    Infrastructure:
+      - Domain
+      - Application
+    Controller:
+      - Application
+
+  formatters:
+    graphviz:
+      point_to_groups: false

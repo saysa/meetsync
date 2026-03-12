@@ -40,6 +40,12 @@ composer-install: ## Run composer install in dev container
 composer-update: ## Run composer update in dev container
 	$(APP_DEV) composer update
 
+##@ Architecture
+
+.PHONY: deptrac
+deptrac: ## Check architecture layer dependencies (Hexagonal Architecture)
+	$(APP_DEV) vendor/bin/deptrac analyse --config-file=deptrac.yaml
+
 ##@ Tests
 
 .PHONY: test
