@@ -8,6 +8,7 @@ use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationSnapshot;
 use App\Domain\Reservation\ReservationRepositoryInterface;
+use App\Domain\Reservation\RoomId;
 use App\Infrastructure\Adapters\Secondary\Doctrine\DoctrineReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,6 +34,51 @@ final class DoctrineReservationRepositoryTest extends KernelTestCase
         }
         $this->entityManager->close();
         parent::tearDown();
+    }
+
+    #[Test]
+    public function should_return_all_reservations_for_a_given_room_when_multiple_reservations_have_been_recorded(): void
+    {
+        // Given
+        $eiffel1 = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-001',
+            roomId: 'eiffel',
+            organizerId: 'alice@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        ));
+        $eiffel2 = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-002',
+            roomId: 'eiffel',
+            organizerId: 'bob@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 14:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 15:00:00 UTC'),
+        ));
+        $louvre = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-003',
+            roomId: 'louvre',
+            organizerId: 'alice@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        ));
+
+        $this->repository->save($eiffel1);
+        $this->repository->save($eiffel2);
+        $this->repository->save($louvre);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        // When
+        $results = $this->repository->findByRoomId(new RoomId('eiffel'));
+
+        // Then
+        self::assertCount(2, $results);
+        foreach ($results as $reservation) {
+            self::assertSame('eiffel', $reservation->toSnapshot()->roomId);
+        }
     }
 
     #[Test]
