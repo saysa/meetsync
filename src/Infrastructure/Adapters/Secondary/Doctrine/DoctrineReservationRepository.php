@@ -19,13 +19,13 @@ final class DoctrineReservationRepository implements ReservationRepositoryInterf
     {
         $snapshot = $reservation->toSnapshot();
 
-        $entity = new DoctrineReservationEntity();
-        $entity->id = $snapshot->id;
-        $entity->roomId = $snapshot->roomId;
+        $entity             = new DoctrineReservationEntity();
+        $entity->id         = $snapshot->id;
+        $entity->roomId     = $snapshot->roomId;
         $entity->organizerId = $snapshot->organizerId;
-        $entity->status = $snapshot->status;
-        $entity->startAt = $snapshot->start;
-        $entity->endAt = $snapshot->end;
+        $entity->status     = $snapshot->status;
+        $entity->startAt    = $snapshot->start;
+        $entity->endAt      = $snapshot->end;
 
         $this->em->persist($entity);
     }
@@ -34,18 +34,7 @@ final class DoctrineReservationRepository implements ReservationRepositoryInterf
     {
         $entity = $this->em->find(DoctrineReservationEntity::class, $id->value);
 
-        if ($entity === null) {
-            return null;
-        }
-
-        return Reservation::fromSnapshot(new ReservationSnapshot(
-            id: $entity->id,
-            roomId: $entity->roomId,
-            organizerId: $entity->organizerId,
-            status: $entity->status,
-            start: $entity->startAt,
-            end: $entity->endAt,
-        ));
+        return $entity !== null ? $this->toReservation($entity) : null;
     }
 
     /** @return list<Reservation> */
@@ -54,24 +43,24 @@ final class DoctrineReservationRepository implements ReservationRepositoryInterf
         $entities = $this->em->getRepository(DoctrineReservationEntity::class)
             ->findBy(['roomId' => $roomId->value]);
 
-        $reservations = [];
-        foreach ($entities as $entity) {
-            $reservations[] = Reservation::fromSnapshot(new ReservationSnapshot(
-                id: $entity->id,
-                roomId: $entity->roomId,
-                organizerId: $entity->organizerId,
-                status: $entity->status,
-                start: $entity->startAt,
-                end: $entity->endAt,
-            ));
-        }
-
-        return $reservations;
+        return array_values(array_map($this->toReservation(...), $entities));
     }
 
     /** @return list<Reservation> */
     public function findByOrganizerId(string $organizerId): array
     {
         return [];
+    }
+
+    private function toReservation(DoctrineReservationEntity $entity): Reservation
+    {
+        return Reservation::fromSnapshot(new ReservationSnapshot(
+            id: $entity->id,
+            roomId: $entity->roomId,
+            organizerId: $entity->organizerId,
+            status: $entity->status,
+            start: $entity->startAt,
+            end: $entity->endAt,
+        ));
     }
 }
