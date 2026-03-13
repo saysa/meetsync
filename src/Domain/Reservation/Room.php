@@ -18,10 +18,10 @@ final readonly class Room
     public function toSnapshot(): RoomSnapshot
     {
         return new RoomSnapshot(
-            id: '',
-            capacity: 0,
-            openingTime: new DateTimeImmutable('00:00:00'),
-            closingTime: new DateTimeImmutable('00:00:00'),
+            id: $this->id->value,
+            capacity: $this->capacity,
+            openingTime: $this->openingTime,
+            closingTime: $this->closingTime,
         );
     }
 
