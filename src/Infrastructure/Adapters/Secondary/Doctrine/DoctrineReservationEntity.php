@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'reservations')]
-class DoctrineReservationEntity
+final class DoctrineReservationEntity
 {
     #[ORM\Id]
     #[ORM\Column(name: 'id', type: 'string', length: 36)]

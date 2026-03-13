@@ -7,6 +7,7 @@ namespace App\Tests\Integration\Infrastructure\Adapters\Secondary\Doctrine;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationSnapshot;
+use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Infrastructure\Adapters\Secondary\Doctrine\DoctrineReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\Test;
@@ -15,7 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 final class DoctrineReservationRepositoryTest extends KernelTestCase
 {
     private EntityManagerInterface $entityManager;
-    private DoctrineReservationRepository $repository;
+    private ReservationRepositoryInterface $repository;
 
     protected function setUp(): void
     {
