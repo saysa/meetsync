@@ -17,7 +17,6 @@ use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\RoomId;
 use App\Domain\Reservation\RoomRepositoryInterface;
-use Symfony\Component\Uid\Uuid;
 
 final class BookRoomUseCase
 {
@@ -61,7 +60,7 @@ final class BookRoomUseCase
             }
         }
 
-        $reservationId = new ReservationId(Uuid::v4()->toRfc4122());
+        $reservationId = ReservationId::generate();
 
         $reservation = Reservation::create(
             id: $reservationId,
