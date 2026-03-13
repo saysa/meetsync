@@ -37,6 +37,30 @@ final class DoctrineReservationRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_return_an_empty_list_when_no_reservations_have_been_recorded_for_a_given_organizer(): void
+    {
+        // Given
+        $bob = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-001',
+            roomId: 'eiffel',
+            organizerId: 'bob@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        ));
+
+        $this->repository->save($bob);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        // When
+        $results = $this->repository->findByOrganizerId('alice@example.com');
+
+        // Then
+        self::assertSame([], $results);
+    }
+
+    #[Test]
     public function should_return_all_reservations_for_a_given_organizer_when_multiple_reservations_have_been_recorded(): void
     {
         // Given
