@@ -51,7 +51,22 @@ final class DoctrineReservationRepository implements ReservationRepositoryInterf
     /** @return list<Reservation> */
     public function findByRoomId(RoomId $roomId): array
     {
-        return [];
+        $entities = $this->em->getRepository(DoctrineReservationEntity::class)
+            ->findBy(['roomId' => $roomId->value]);
+
+        $reservations = [];
+        foreach ($entities as $entity) {
+            $reservations[] = Reservation::fromSnapshot(new ReservationSnapshot(
+                id: $entity->id,
+                roomId: $entity->roomId,
+                organizerId: $entity->organizerId,
+                status: $entity->status,
+                start: $entity->startAt,
+                end: $entity->endAt,
+            ));
+        }
+
+        return $reservations;
     }
 
     /** @return list<Reservation> */
