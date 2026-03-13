@@ -36,6 +36,18 @@ final class DoctrineReservationRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_return_nothing_when_looking_up_a_reservation_identifier_that_has_never_been_recorded(): void
+    {
+        // Given — empty table (guaranteed by transaction rollback from tearDown)
+
+        // When
+        $result = $this->repository->findById(new ReservationId('00000000-0000-0000-0000-000000000000'));
+
+        // Then
+        self::assertNull($result);
+    }
+
+    #[Test]
     public function should_make_a_confirmed_reservation_retrievable_by_its_identifier_after_it_has_been_recorded(): void
     {
         // Given
