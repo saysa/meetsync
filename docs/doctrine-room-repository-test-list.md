@@ -67,7 +67,7 @@ Column design rationale:
 
 | # | Status | Test |
 |---|---|---|
-| 1 | ☐ | should make a room retrievable by its identifier when it has been seeded in the database |
+| 1 | ✅ DONE | should make a room retrievable by its identifier when it has been seeded in the database |
 | 2 | ☐ | should return nothing when looking up a room identifier that does not exist in the database |
 | 3 | ☐ | should preserve the capacity and the operating hours of a room exactly when it is retrieved |
 | 4 | ☐ | should return nothing for one room when only a different room has been seeded in the database |
