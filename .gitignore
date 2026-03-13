@@ -24,3 +24,5 @@ test_db_data/
 
 infection/
 infection.log
+
+/.deptrac.cache
