@@ -65,8 +65,8 @@ Column naming rationale:
 
 | # | Status | Test |
 |---|---|---|
-| 1 | NOT DONE | should make a confirmed reservation retrievable by its identifier after it has been recorded |
-| 2 | NOT DONE | should return nothing when looking up a reservation identifier that has never been recorded |
+| 1 | ✅ DONE | should make a confirmed reservation retrievable by its identifier after it has been recorded |
+| 2 | ✅ DONE | should return nothing when looking up a reservation identifier that has never been recorded |
 | 3 | NOT DONE | should preserve the organizer, the room, and the exact time window of a confirmed reservation when it is stored and retrieved |
 | 4 | NOT DONE | should preserve the cancelled status of a reservation when it is stored and retrieved |
 | 5 | NOT DONE | should return all reservations for a given room when multiple reservations have been recorded |
