@@ -37,6 +37,51 @@ final class DoctrineReservationRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_return_all_reservations_for_a_given_organizer_when_multiple_reservations_have_been_recorded(): void
+    {
+        // Given
+        $alice1 = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-001',
+            roomId: 'eiffel',
+            organizerId: 'alice@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        ));
+        $alice2 = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-002',
+            roomId: 'louvre',
+            organizerId: 'alice@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 14:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 15:00:00 UTC'),
+        ));
+        $bob = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-003',
+            roomId: 'eiffel',
+            organizerId: 'bob@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 12:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 13:00:00 UTC'),
+        ));
+
+        $this->repository->save($alice1);
+        $this->repository->save($alice2);
+        $this->repository->save($bob);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        // When
+        $results = $this->repository->findByOrganizerId('alice@example.com');
+
+        // Then
+        self::assertCount(2, $results);
+        foreach ($results as $reservation) {
+            self::assertSame('alice@example.com', $reservation->toSnapshot()->organizerId);
+        }
+    }
+
+    #[Test]
     public function should_return_an_empty_list_when_no_reservations_have_been_recorded_for_a_given_room(): void
     {
         // Given
