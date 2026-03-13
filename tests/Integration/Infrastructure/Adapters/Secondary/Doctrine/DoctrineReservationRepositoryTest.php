@@ -36,6 +36,35 @@ final class DoctrineReservationRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_preserve_the_organizer_the_room_and_the_exact_time_window_of_a_confirmed_reservation_when_it_is_stored_and_retrieved(): void
+    {
+        // Given
+        $reservation = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-001',
+            roomId: 'eiffel',
+            organizerId: 'alice@example.com',
+            status: 'CONFIRMED',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        ));
+
+        $this->repository->save($reservation);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        // When
+        $snapshot = $this->repository->findById(new ReservationId('res-001'))->toSnapshot();
+
+        // Then
+        self::assertSame('res-001',              $snapshot->id);
+        self::assertSame('eiffel',               $snapshot->roomId);
+        self::assertSame('alice@example.com',    $snapshot->organizerId);
+        self::assertSame('CONFIRMED',            $snapshot->status);
+        self::assertSame('2026-03-09T10:00:00+00:00', $snapshot->start->format(\DateTimeInterface::ATOM));
+        self::assertSame('2026-03-09T11:00:00+00:00', $snapshot->end->format(\DateTimeInterface::ATOM));
+    }
+
+    #[Test]
     public function should_return_nothing_when_looking_up_a_reservation_identifier_that_has_never_been_recorded(): void
     {
         // Given — empty table (guaranteed by transaction rollback from tearDown)
