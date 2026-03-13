@@ -7,6 +7,7 @@ namespace App\Infrastructure\Adapters\Secondary\Doctrine;
 use App\Domain\Reservation\Room;
 use App\Domain\Reservation\RoomId;
 use App\Domain\Reservation\RoomRepositoryInterface;
+use App\Domain\Reservation\RoomSnapshot;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineRoomRepository implements RoomRepositoryInterface
@@ -15,6 +16,17 @@ final class DoctrineRoomRepository implements RoomRepositoryInterface
 
     public function findById(RoomId $roomId): ?Room
     {
-        return null;
+        $entity = $this->em->find(DoctrineRoomEntity::class, $roomId->value);
+
+        if ($entity === null) {
+            return null;
+        }
+
+        return Room::fromSnapshot(new RoomSnapshot(
+            id: $entity->id,
+            capacity: $entity->capacity,
+            openingTime: $entity->openingTime,
+            closingTime: $entity->closingTime,
+        ));
     }
 }
