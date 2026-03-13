@@ -9,16 +9,16 @@ use DateTimeImmutable;
 final readonly class Room
 {
     public function __construct(
+        private RoomId $id,
         private int $capacity,
         private DateTimeImmutable $openingTime,
         private DateTimeImmutable $closingTime,
-        private ?RoomId $id = null,
     ) {}
 
     public function toSnapshot(): RoomSnapshot
     {
         return new RoomSnapshot(
-            id: $this->id?->value ?? '',
+            id: $this->id->value,
             capacity: $this->capacity,
             openingTime: $this->openingTime,
             closingTime: $this->closingTime,

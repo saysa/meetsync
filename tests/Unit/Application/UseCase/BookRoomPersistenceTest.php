@@ -43,6 +43,7 @@ final class BookRoomPersistenceTest extends TestCase
                 public function findById(RoomId $roomId): ?Room
                 {
                     return new Room(
+                        id: new RoomId('eiffel'),
                         capacity: 8,
                         openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
                         closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
@@ -112,6 +113,7 @@ final class BookRoomPersistenceTest extends TestCase
                 public function findById(RoomId $roomId): ?Room
                 {
                     return new Room(
+                        id: new RoomId('eiffel'),
                         capacity: 8,
                         openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
                         closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
@@ -180,6 +182,7 @@ final class BookRoomPersistenceTest extends TestCase
                 public function findById(RoomId $roomId): ?Room
                 {
                     return new Room(
+                        id: new RoomId('eiffel'),
                         capacity: 8,
                         openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
                         closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
@@ -264,6 +267,7 @@ final class BookRoomPersistenceTest extends TestCase
                 public function findById(RoomId $roomId): ?Room
                 {
                     return new Room(
+                        id: new RoomId('eiffel'),
                         capacity: 8,
                         openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
                         closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
