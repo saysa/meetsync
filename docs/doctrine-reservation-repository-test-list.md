@@ -72,7 +72,7 @@ Column naming rationale:
 | 5 | ✅ DONE | should return all reservations for a given room when multiple reservations have been recorded |
 | 6 | ✅ DONE | should return an empty list when no reservations have been recorded for a given room |
 | 7 | ✅ DONE | should return all reservations for a given organizer when multiple reservations have been recorded |
-| 8 | NOT DONE | should return an empty list when no reservations have been recorded for a given organizer |
+| 8 | ✅ DONE | should return an empty list when no reservations have been recorded for a given organizer |
 
 ---
 
