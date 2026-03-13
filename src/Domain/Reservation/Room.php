@@ -12,7 +12,18 @@ final readonly class Room
         public int $capacity,
         public DateTimeImmutable $openingTime,
         public DateTimeImmutable $closingTime,
+        public ?RoomId $id = null,
     ) {}
+
+    public function toSnapshot(): RoomSnapshot
+    {
+        return new RoomSnapshot(
+            id: '',
+            capacity: 0,
+            openingTime: new DateTimeImmutable('00:00:00'),
+            closingTime: new DateTimeImmutable('00:00:00'),
+        );
+    }
 
     public function canAccommodate(int $participantCount): bool
     {
