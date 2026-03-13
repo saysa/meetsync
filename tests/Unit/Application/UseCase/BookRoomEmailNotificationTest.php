@@ -12,10 +12,10 @@ use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
+use App\Domain\Reservation\ReservationSnapshot;
 use App\Domain\Reservation\Room;
 use App\Domain\Reservation\RoomId;
 use App\Domain\Reservation\RoomRepositoryInterface;
-use App\Domain\Reservation\Timeslot;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -137,14 +137,14 @@ final class BookRoomEmailNotificationTest extends TestCase
                 public function findByRoomId(RoomId $roomId): array
                 {
                     return [
-                        new Reservation(
-                            id: new ReservationId('res-existing'),
+                        Reservation::fromSnapshot(new ReservationSnapshot(
+                            id: 'res-existing',
+                            roomId: 'eiffel',
                             organizerId: 'bob',
-                            timeslot: new Timeslot(
-                                new DateTimeImmutable('2026-03-09 14:00:00'),
-                                new DateTimeImmutable('2026-03-09 15:00:00'),
-                            ),
-                        ),
+                            status: 'CONFIRMED',
+                            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+                            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+                        )),
                     ];
                 }
                 public function findById(ReservationId $id): ?Reservation { return null; }

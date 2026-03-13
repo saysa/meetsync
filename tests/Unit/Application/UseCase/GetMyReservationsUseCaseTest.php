@@ -10,8 +10,8 @@ use App\Domain\Clock\ClockInterface;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
+use App\Domain\Reservation\ReservationSnapshot;
 use App\Domain\Reservation\RoomId;
-use App\Domain\Reservation\Timeslot;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -32,14 +32,14 @@ final class GetMyReservationsUseCaseTest extends TestCase
 
     private function aFutureReservationForAlice(): Reservation
     {
-        return new Reservation(
-            id: new ReservationId('res-alice-1'),
+        return Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-alice-1',
+            roomId: 'eiffel',
             organizerId: 'alice',
-            timeslot: new Timeslot(
-                new DateTimeImmutable('2026-03-09 14:00:00'),
-                new DateTimeImmutable('2026-03-09 15:00:00'),
-            ),
-        );
+            status: 'CONFIRMED',
+            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+        ));
     }
 
     #[Test]
@@ -74,14 +74,14 @@ final class GetMyReservationsUseCaseTest extends TestCase
     public function should_exclude_reservations_that_belong_to_a_different_organizer(): void
     {
         $alicesReservation = $this->aFutureReservationForAlice();
-        $bobsReservation = new Reservation(
-            id: new ReservationId('res-bob-1'),
+        $bobsReservation = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-bob-1',
+            roomId: 'eiffel',
             organizerId: 'bob',
-            timeslot: new Timeslot(
-                new DateTimeImmutable('2026-03-09 16:00:00'),
-                new DateTimeImmutable('2026-03-09 17:00:00'),
-            ),
-        );
+            status: 'CONFIRMED',
+            start: new DateTimeImmutable('2026-03-09 16:00:00'),
+            end: new DateTimeImmutable('2026-03-09 17:00:00'),
+        ));
 
         $reservationRepository = new class ($alicesReservation, $bobsReservation) implements ReservationRepositoryInterface {
             public function __construct(
@@ -112,14 +112,14 @@ final class GetMyReservationsUseCaseTest extends TestCase
     #[Test]
     public function should_exclude_a_confirmed_reservation_whose_start_time_is_in_the_past(): void
     {
-        $pastReservation = new Reservation(
-            id: new ReservationId('res-alice-past'),
+        $pastReservation = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-alice-past',
+            roomId: 'eiffel',
             organizerId: 'alice',
-            timeslot: new Timeslot(
-                new DateTimeImmutable('2026-03-05 09:00:00'),
-                new DateTimeImmutable('2026-03-05 10:00:00'),
-            ),
-        );
+            status: 'CONFIRMED',
+            start: new DateTimeImmutable('2026-03-05 09:00:00'),
+            end: new DateTimeImmutable('2026-03-05 10:00:00'),
+        ));
 
         $reservationRepository = new class ($pastReservation) implements ReservationRepositoryInterface {
             public function __construct(private Reservation $pastReservation) {}
@@ -175,22 +175,22 @@ final class GetMyReservationsUseCaseTest extends TestCase
     #[Test]
     public function should_return_reservations_ordered_chronologically_by_start_time_when_the_organizer_has_several_future_ones(): void
     {
-        $reservationToday = new Reservation(
-            id: new ReservationId('res-1'),
+        $reservationToday = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-1',
+            roomId: 'eiffel',
             organizerId: 'alice',
-            timeslot: new Timeslot(
-                new DateTimeImmutable('2026-03-09 14:00:00'),
-                new DateTimeImmutable('2026-03-09 15:00:00'),
-            ),
-        );
-        $reservationTomorrow = new Reservation(
-            id: new ReservationId('res-2'),
+            status: 'CONFIRMED',
+            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+        ));
+        $reservationTomorrow = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-2',
+            roomId: 'eiffel',
             organizerId: 'alice',
-            timeslot: new Timeslot(
-                new DateTimeImmutable('2026-03-10 10:00:00'),
-                new DateTimeImmutable('2026-03-10 11:00:00'),
-            ),
-        );
+            status: 'CONFIRMED',
+            start: new DateTimeImmutable('2026-03-10 10:00:00'),
+            end: new DateTimeImmutable('2026-03-10 11:00:00'),
+        ));
 
         // Repository returns them in REVERSE order to force the sort
         $reservationRepository = new class ($reservationTomorrow, $reservationToday) implements ReservationRepositoryInterface {

@@ -14,7 +14,7 @@ final class Reservation
     private bool $cancelled = false;
     private string $roomId = '';
 
-    public function __construct(
+    private function __construct(
         private ReservationId $id,
         private string $organizerId,
         private Timeslot $timeslot,
