@@ -7,6 +7,7 @@ namespace App\Infrastructure\Adapters\Secondary\Doctrine;
 use App\Domain\Reservation\Reservation;
 use App\Domain\Reservation\ReservationId;
 use App\Domain\Reservation\ReservationRepositoryInterface;
+use App\Domain\Reservation\ReservationSnapshot;
 use App\Domain\Reservation\RoomId;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -16,12 +17,35 @@ final class DoctrineReservationRepository implements ReservationRepositoryInterf
 
     public function save(Reservation $reservation): void
     {
-        // scaffold — does nothing
+        $snapshot = $reservation->toSnapshot();
+
+        $entity = new DoctrineReservationEntity();
+        $entity->id = $snapshot->id;
+        $entity->roomId = $snapshot->roomId;
+        $entity->organizerId = $snapshot->organizerId;
+        $entity->status = $snapshot->status;
+        $entity->startAt = $snapshot->start;
+        $entity->endAt = $snapshot->end;
+
+        $this->em->persist($entity);
     }
 
     public function findById(ReservationId $id): ?Reservation
     {
-        return null;
+        $entity = $this->em->find(DoctrineReservationEntity::class, $id->value);
+
+        if ($entity === null) {
+            return null;
+        }
+
+        return Reservation::fromSnapshot(new ReservationSnapshot(
+            id: $entity->id,
+            roomId: $entity->roomId,
+            organizerId: $entity->organizerId,
+            status: $entity->status,
+            start: $entity->startAt,
+            end: $entity->endAt,
+        ));
     }
 
     /** @return list<Reservation> */
