@@ -51,7 +51,7 @@ Test 6 is the regression guard: making the constructor `private` will break all 
 | 4 | ✅ DONE | should not save any booking when the reservation is refused because the room is already taken for that time slot |
 | 5 | ✅ DONE | should give each booking a unique reference number when the same room is reserved twice for two different time slots |
 | 6 | ✅ DONE | should enforce booking rules correctly against a reservation that already exists in the system |
-| 7 | ☐ | should record the room capacity and operating hours when a room is saved |
+| 7 | ✅ DONE | should record the room capacity and operating hours when a room is saved |
 | 8 | ☐ | should preserve the room capacity and operating hours when a room is saved and loaded back |
 
 ---
