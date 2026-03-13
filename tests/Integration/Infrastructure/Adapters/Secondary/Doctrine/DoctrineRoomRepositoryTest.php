@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Integration\Infrastructure\Adapters\Secondary\Doctrine;
+
+use App\Domain\Reservation\RoomId;
+use App\Domain\Reservation\RoomRepositoryInterface;
+use App\Infrastructure\Adapters\Secondary\Doctrine\DoctrineRoomEntity;
+use App\Infrastructure\Adapters\Secondary\Doctrine\DoctrineRoomRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\Test;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+final class DoctrineRoomRepositoryTest extends KernelTestCase
+{
+    private EntityManagerInterface $entityManager;
+    private RoomRepositoryInterface $repository;
+
+    protected function setUp(): void
+    {
+        self::bootKernel();
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->repository    = new DoctrineRoomRepository($this->entityManager);
+        $this->entityManager->beginTransaction();
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->entityManager->getConnection()->isTransactionActive()) {
+            $this->entityManager->rollback();
+        }
+        $this->entityManager->close();
+        parent::tearDown();
+    }
+
+    private function seedRoom(
+        string $id,
+        int $capacity = 8,
+        string $openingTime = '08:00',
+        string $closingTime = '19:00',
+    ): void {
+        $entity              = new DoctrineRoomEntity();
+        $entity->id          = $id;
+        $entity->capacity    = $capacity;
+        $entity->openingTime = new \DateTimeImmutable($openingTime);
+        $entity->closingTime = new \DateTimeImmutable($closingTime);
+
+        $this->entityManager->persist($entity);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+    }
+
+    #[Test]
+    public function should_make_a_room_retrievable_by_its_identifier_when_it_has_been_seeded_in_the_database(): void
+    {
+        // Given
+        $this->seedRoom('eiffel');
+
+        // When
+        $result = $this->repository->findById(new RoomId('eiffel'));
+
+        // Then
+        self::assertNotNull($result);
+        self::assertSame('eiffel', $result->toSnapshot()->id);
+    }
+}
