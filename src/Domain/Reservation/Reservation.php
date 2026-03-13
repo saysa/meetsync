@@ -11,13 +11,12 @@ final class Reservation
     private const string STATUS_CONFIRMED = 'CONFIRMED';
     private const string STATUS_CANCELLED = 'CANCELLED';
 
-    private bool $cancelled = false;
-    private string $roomId = '';
-
     private function __construct(
         private ReservationId $id,
         private string $organizerId,
         private Timeslot $timeslot,
+        private RoomId $roomId,
+        private bool $cancelled = false,
     ) {}
 
     public static function create(
@@ -26,28 +25,25 @@ final class Reservation
         string $organizerId,
         Timeslot $timeslot,
     ): self {
-        $reservation = new self($id, $organizerId, $timeslot);
-        $reservation->roomId = $roomId->value;
-        return $reservation;
+        return new self($id, $organizerId, $timeslot, $roomId);
     }
 
     public static function fromSnapshot(ReservationSnapshot $snapshot): self
     {
-        $reservation = new self(
-            new ReservationId($snapshot->id),
-            $snapshot->organizerId,
-            new Timeslot($snapshot->start, $snapshot->end),
+        return new self(
+            id: new ReservationId($snapshot->id),
+            organizerId: $snapshot->organizerId,
+            timeslot: new Timeslot($snapshot->start, $snapshot->end),
+            roomId: new RoomId($snapshot->roomId),
+            cancelled: $snapshot->status === self::STATUS_CANCELLED,
         );
-        $reservation->roomId = $snapshot->roomId;
-        $reservation->cancelled = $snapshot->status === self::STATUS_CANCELLED;
-        return $reservation;
     }
 
     public function toSnapshot(): ReservationSnapshot
     {
         return new ReservationSnapshot(
             id: $this->id->value,
-            roomId: $this->roomId,
+            roomId: $this->roomId->value,
             organizerId: $this->organizerId,
             status: $this->cancelled ? self::STATUS_CANCELLED : self::STATUS_CONFIRMED,
             start: $this->timeslot->start,
