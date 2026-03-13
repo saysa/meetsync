@@ -25,6 +25,16 @@ final readonly class Room
         );
     }
 
+    public static function fromSnapshot(RoomSnapshot $snapshot): self
+    {
+        return new self(
+            id: null,
+            capacity: $snapshot->capacity,
+            openingTime: $snapshot->openingTime,
+            closingTime: $snapshot->closingTime,
+        );
+    }
+
     public function canAccommodate(int $participantCount): bool
     {
         return $participantCount <= $this->capacity;
