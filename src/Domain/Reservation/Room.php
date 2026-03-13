@@ -28,7 +28,7 @@ final readonly class Room
     public static function fromSnapshot(RoomSnapshot $snapshot): self
     {
         return new self(
-            id: null,
+            id: new RoomId($snapshot->id),
             capacity: $snapshot->capacity,
             openingTime: $snapshot->openingTime,
             closingTime: $snapshot->closingTime,
