@@ -36,6 +36,30 @@ final class DoctrineReservationRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_preserve_the_cancelled_status_of_a_reservation_when_it_is_stored_and_retrieved(): void
+    {
+        // Given
+        $reservation = Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-001',
+            roomId: 'eiffel',
+            organizerId: 'alice@example.com',
+            status: 'CANCELLED',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        ));
+
+        $this->repository->save($reservation);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        // When
+        $snapshot = $this->repository->findById(new ReservationId('res-001'))->toSnapshot();
+
+        // Then
+        self::assertSame('CANCELLED', $snapshot->status);
+    }
+
+    #[Test]
     public function should_preserve_the_organizer_the_room_and_the_exact_time_window_of_a_confirmed_reservation_when_it_is_stored_and_retrieved(): void
     {
         // Given
