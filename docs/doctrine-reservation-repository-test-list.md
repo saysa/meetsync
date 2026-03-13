@@ -71,7 +71,7 @@ Column naming rationale:
 | 4 | ✅ DONE | should preserve the cancelled status of a reservation when it is stored and retrieved |
 | 5 | ✅ DONE | should return all reservations for a given room when multiple reservations have been recorded |
 | 6 | ✅ DONE | should return an empty list when no reservations have been recorded for a given room |
-| 7 | NOT DONE | should return all reservations for a given organizer when multiple reservations have been recorded |
+| 7 | ✅ DONE | should return all reservations for a given organizer when multiple reservations have been recorded |
 | 8 | NOT DONE | should return an empty list when no reservations have been recorded for a given organizer |
 
 ---
