@@ -18,20 +18,19 @@ doctrine:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         auto_mapping: true
         mappings:
-            App:
+            Reservation:
                 type: attribute
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Entity'
-                prefix: 'App\Entity'
-                alias: App
+                dir: '%kernel.project_dir%/src/Infrastructure/Adapters/Secondary/Doctrine'
+                prefix: 'App\Infrastructure\Adapters\Secondary\Doctrine'
+                alias: Reservation
         controller_resolver:
             auto_mapping: false
 
 when@test:
     doctrine:
         dbal:
-            # "TEST_TOKEN" is typically set by ParaTest
-            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+            dbname_suffix: ''
 
 when@prod:
     doctrine:
