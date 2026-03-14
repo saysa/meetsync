@@ -52,6 +52,19 @@ final class DoctrineRoomRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_return_nothing_for_one_room_when_only_a_different_room_has_been_seeded_in_the_database(): void
+    {
+        // Given
+        $this->seedRoom('louvre');
+
+        // When
+        $result = $this->repository->findById(new RoomId('eiffel'));
+
+        // Then
+        self::assertNull($result);
+    }
+
+    #[Test]
     public function should_preserve_the_capacity_and_the_operating_hours_of_a_room_exactly_when_it_is_retrieved(): void
     {
         // Given
