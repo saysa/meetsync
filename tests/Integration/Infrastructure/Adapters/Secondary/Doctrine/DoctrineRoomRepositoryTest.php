@@ -52,6 +52,18 @@ final class DoctrineRoomRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_return_nothing_when_looking_up_a_room_identifier_that_does_not_exist_in_the_database(): void
+    {
+        // Given — empty table (guaranteed by transaction rollback from tearDown)
+
+        // When
+        $result = $this->repository->findById(new RoomId('unknown'));
+
+        // Then
+        self::assertNull($result);
+    }
+
+    #[Test]
     public function should_make_a_room_retrievable_by_its_identifier_when_it_has_been_seeded_in_the_database(): void
     {
         // Given
