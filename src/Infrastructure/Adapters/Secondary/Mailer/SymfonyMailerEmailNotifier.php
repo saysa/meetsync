@@ -26,7 +26,7 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
                 ->from(self::SENDER)
                 ->to($organizerEmail)
                 ->subject('Booking confirmed')
-                ->text('ok'),
+                ->text('Room: '.$roomId.' on '.$start->format('Y-m-d').' from '.$start->format('H:i').' to '.$end->format('H:i')),
         );
     }
 
