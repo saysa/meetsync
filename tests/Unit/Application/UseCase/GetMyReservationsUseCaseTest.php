@@ -8,10 +8,8 @@ use App\Application\Query\GetMyReservationsQuery;
 use App\Application\UseCase\GetMyReservationsUseCase;
 use App\Domain\Clock\ClockInterface;
 use App\Domain\Reservation\Reservation;
-use App\Domain\Reservation\ReservationId;
-use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\ReservationSnapshot;
-use App\Domain\Reservation\RoomId;
+use App\Tests\Fixtures\InMemoryReservationRepository;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -47,17 +45,8 @@ final class GetMyReservationsUseCaseTest extends TestCase
     {
         $reservation = $this->aFutureReservationForAlice();
 
-        $reservationRepository = new class ($reservation) implements ReservationRepositoryInterface {
-            public function __construct(private Reservation $reservation) {}
-
-            public function findByRoomId(RoomId $roomId): array { return []; }
-            public function findById(ReservationId $id): ?Reservation { return null; }
-            public function save(Reservation $reservation): void {}
-            public function findByOrganizerId(string $organizerId): array
-            {
-                return [$this->reservation];
-            }
-        };
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($reservation);
 
         $useCase = new GetMyReservationsUseCase(
             reservationRepository: $reservationRepository,
@@ -74,7 +63,7 @@ final class GetMyReservationsUseCaseTest extends TestCase
     public function should_exclude_reservations_that_belong_to_a_different_organizer(): void
     {
         $alicesReservation = $this->aFutureReservationForAlice();
-        $bobsReservation = Reservation::fromSnapshot(new ReservationSnapshot(
+        $bobsReservation   = Reservation::fromSnapshot(new ReservationSnapshot(
             id: 'res-bob-1',
             roomId: 'eiffel',
             organizerId: 'bob',
@@ -83,20 +72,8 @@ final class GetMyReservationsUseCaseTest extends TestCase
             end: new DateTimeImmutable('2026-03-09 17:00:00'),
         ));
 
-        $reservationRepository = new class ($alicesReservation, $bobsReservation) implements ReservationRepositoryInterface {
-            public function __construct(
-                private Reservation $alicesReservation,
-                private Reservation $bobsReservation,
-            ) {}
-
-            public function findByRoomId(RoomId $roomId): array { return []; }
-            public function findById(ReservationId $id): ?Reservation { return null; }
-            public function save(Reservation $reservation): void {}
-            public function findByOrganizerId(string $organizerId): array
-            {
-                return [$this->alicesReservation, $this->bobsReservation];
-            }
-        };
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($alicesReservation, $bobsReservation);
 
         $useCase = new GetMyReservationsUseCase(
             reservationRepository: $reservationRepository,
@@ -121,17 +98,8 @@ final class GetMyReservationsUseCaseTest extends TestCase
             end: new DateTimeImmutable('2026-03-05 10:00:00'),
         ));
 
-        $reservationRepository = new class ($pastReservation) implements ReservationRepositoryInterface {
-            public function __construct(private Reservation $pastReservation) {}
-
-            public function findByRoomId(RoomId $roomId): array { return []; }
-            public function findById(ReservationId $id): ?Reservation { return null; }
-            public function save(Reservation $reservation): void {}
-            public function findByOrganizerId(string $organizerId): array
-            {
-                return [$this->pastReservation];
-            }
-        };
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($pastReservation);
 
         $useCase = new GetMyReservationsUseCase(
             reservationRepository: $reservationRepository,
@@ -149,17 +117,8 @@ final class GetMyReservationsUseCaseTest extends TestCase
         $cancelledFutureReservation = $this->aFutureReservationForAlice();
         $cancelledFutureReservation->cancel();
 
-        $reservationRepository = new class ($cancelledFutureReservation) implements ReservationRepositoryInterface {
-            public function __construct(private Reservation $reservation) {}
-
-            public function findByRoomId(RoomId $roomId): array { return []; }
-            public function findById(ReservationId $id): ?Reservation { return null; }
-            public function save(Reservation $reservation): void {}
-            public function findByOrganizerId(string $organizerId): array
-            {
-                return [$this->reservation];
-            }
-        };
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($cancelledFutureReservation);
 
         $useCase = new GetMyReservationsUseCase(
             reservationRepository: $reservationRepository,
@@ -175,7 +134,7 @@ final class GetMyReservationsUseCaseTest extends TestCase
     #[Test]
     public function should_return_reservations_ordered_chronologically_by_start_time_when_the_organizer_has_several_future_ones(): void
     {
-        $reservationToday = Reservation::fromSnapshot(new ReservationSnapshot(
+        $reservationToday    = Reservation::fromSnapshot(new ReservationSnapshot(
             id: 'res-1',
             roomId: 'eiffel',
             organizerId: 'alice',
@@ -192,21 +151,9 @@ final class GetMyReservationsUseCaseTest extends TestCase
             end: new DateTimeImmutable('2026-03-10 11:00:00'),
         ));
 
-        // Repository returns them in REVERSE order to force the sort
-        $reservationRepository = new class ($reservationTomorrow, $reservationToday) implements ReservationRepositoryInterface {
-            public function __construct(
-                private Reservation $reservationTomorrow,
-                private Reservation $reservationToday,
-            ) {}
-
-            public function findByRoomId(RoomId $roomId): array { return []; }
-            public function findById(ReservationId $id): ?Reservation { return null; }
-            public function save(Reservation $reservation): void {}
-            public function findByOrganizerId(string $organizerId): array
-            {
-                return [$this->reservationTomorrow, $this->reservationToday];
-            }
-        };
+        // Seeded in reverse order to force the use case to sort
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($reservationTomorrow, $reservationToday);
 
         $useCase = new GetMyReservationsUseCase(
             reservationRepository: $reservationRepository,
@@ -216,28 +163,19 @@ final class GetMyReservationsUseCaseTest extends TestCase
         $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
 
         self::assertCount(2, $result);
-        self::assertSame($reservationToday, $result[0]);
+        self::assertSame($reservationToday,    $result[0]);
         self::assertSame($reservationTomorrow, $result[1]);
     }
 
     #[Test]
     public function should_return_an_empty_list_when_the_organizer_has_no_reservations(): void
     {
-        $reservationRepository = new class implements ReservationRepositoryInterface {
-            public function findByRoomId(RoomId $roomId): array { return []; }
-            public function findById(ReservationId $id): ?Reservation { return null; }
-            public function save(Reservation $reservation): void {}
-            public function findByOrganizerId(string $organizerId): array { return []; }
-        };
-
         $useCase = new GetMyReservationsUseCase(
-            reservationRepository: $reservationRepository,
+            reservationRepository: new InMemoryReservationRepository(),
             clock: $this->fixedClock(),
         );
 
-        $query = new GetMyReservationsQuery(organizerId: 'alice');
-
-        $result = $useCase->execute($query);
+        $result = $useCase->execute(new GetMyReservationsQuery(organizerId: 'alice'));
 
         self::assertSame([], $result);
     }

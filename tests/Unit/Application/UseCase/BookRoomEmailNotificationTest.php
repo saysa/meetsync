@@ -10,38 +10,28 @@ use App\Domain\Clock\ClockInterface;
 use App\Domain\Exception\TimeslotConflictException;
 use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\Reservation;
-use App\Domain\Reservation\ReservationId;
-use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\ReservationSnapshot;
 use App\Domain\Reservation\Room;
 use App\Domain\Reservation\RoomId;
-use App\Domain\Reservation\RoomRepositoryInterface;
+use App\Tests\Fixtures\InMemoryReservationRepository;
+use App\Tests\Fixtures\InMemoryRoomRepository;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 final class BookRoomEmailNotificationTest extends TestCase
 {
-    private function roomRepository(Room $room): RoomRepositoryInterface
+    private function eiffelRoomRepository(): InMemoryRoomRepository
     {
-        return new class ($room) implements RoomRepositoryInterface {
-            public function __construct(private Room $room) {}
+        $repository = new InMemoryRoomRepository();
+        $repository->add(new Room(
+            id: new RoomId('eiffel'),
+            capacity: 8,
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+        ));
 
-            public function findById(RoomId $roomId): ?Room
-            {
-                return $this->room;
-            }
-        };
-    }
-
-    private function emptyReservationRepository(): ReservationRepositoryInterface
-    {
-        return new class implements ReservationRepositoryInterface {
-            public function findByRoomId(RoomId $roomId): array { return []; }
-            public function findById(ReservationId $id): ?Reservation { return null; }
-            public function save(Reservation $reservation): void {}
-            public function findByOrganizerId(string $organizerId): array { return []; }
-        };
+        return $repository;
     }
 
     private function fixedClock(string $now = '2026-03-09 09:00:00'): ClockInterface
@@ -54,16 +44,6 @@ final class BookRoomEmailNotificationTest extends TestCase
                 return new DateTimeImmutable($this->now);
             }
         };
-    }
-
-    private function eiffelRoom(): Room
-    {
-        return new Room(
-            id: new RoomId('eiffel'),
-            capacity: 8,
-            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
-            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
-        );
     }
 
     #[Test]
@@ -90,21 +70,19 @@ final class BookRoomEmailNotificationTest extends TestCase
         };
 
         $useCase = new BookRoomUseCase(
-            roomRepository: $this->roomRepository($this->eiffelRoom()),
-            reservationRepository: $this->emptyReservationRepository(),
+            roomRepository: $this->eiffelRoomRepository(),
+            reservationRepository: new InMemoryReservationRepository(),
             clock: $this->fixedClock(),
             emailNotifier: $spy,
         );
 
-        $command = new BookRoomCommand(
+        $useCase->execute(new BookRoomCommand(
             roomId: 'eiffel',
             start: new DateTimeImmutable('2026-03-09 14:00:00'),
             end: new DateTimeImmutable('2026-03-09 15:00:00'),
             participantCount: 3,
             organizerEmail: 'alice@example.com',
-        );
-
-        $useCase->execute($command);
+        ));
 
         self::assertSame('alice@example.com', $spy->confirmationSentTo);
     }
@@ -132,40 +110,31 @@ final class BookRoomEmailNotificationTest extends TestCase
             ): void {}
         };
 
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add(Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-existing',
+            roomId: 'eiffel',
+            organizerId: 'bob',
+            status: 'CONFIRMED',
+            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+        )));
+
         $useCase = new BookRoomUseCase(
-            roomRepository: $this->roomRepository($this->eiffelRoom()),
-            reservationRepository: new class implements ReservationRepositoryInterface {
-                public function findByRoomId(RoomId $roomId): array
-                {
-                    return [
-                        Reservation::fromSnapshot(new ReservationSnapshot(
-                            id: 'res-existing',
-                            roomId: 'eiffel',
-                            organizerId: 'bob',
-                            status: 'CONFIRMED',
-                            start: new DateTimeImmutable('2026-03-09 14:00:00'),
-                            end: new DateTimeImmutable('2026-03-09 15:00:00'),
-                        )),
-                    ];
-                }
-                public function findById(ReservationId $id): ?Reservation { return null; }
-                public function save(Reservation $reservation): void {}
-                public function findByOrganizerId(string $organizerId): array { return []; }
-            },
+            roomRepository: $this->eiffelRoomRepository(),
+            reservationRepository: $reservationRepository,
             clock: $this->fixedClock(),
             emailNotifier: $spy,
         );
 
-        $command = new BookRoomCommand(
-            roomId: 'eiffel',
-            start: new DateTimeImmutable('2026-03-09 14:00:00'),
-            end: new DateTimeImmutable('2026-03-09 15:00:00'),
-            participantCount: 3,
-            organizerEmail: 'alice@example.com',
-        );
-
         try {
-            $useCase->execute($command);
+            $useCase->execute(new BookRoomCommand(
+                roomId: 'eiffel',
+                start: new DateTimeImmutable('2026-03-09 14:00:00'),
+                end: new DateTimeImmutable('2026-03-09 15:00:00'),
+                participantCount: 3,
+                organizerEmail: 'alice@example.com',
+            ));
             self::fail('Expected TimeslotConflictException was not thrown');
         } catch (TimeslotConflictException) {
             // expected
@@ -198,21 +167,19 @@ final class BookRoomEmailNotificationTest extends TestCase
         };
 
         $useCase = new BookRoomUseCase(
-            roomRepository: $this->roomRepository($this->eiffelRoom()),
-            reservationRepository: $this->emptyReservationRepository(),
+            roomRepository: $this->eiffelRoomRepository(),
+            reservationRepository: new InMemoryReservationRepository(),
             clock: $this->fixedClock(),
             emailNotifier: $failingNotifier,
         );
 
-        $command = new BookRoomCommand(
+        $reservationId = $useCase->execute(new BookRoomCommand(
             roomId: 'eiffel',
             start: new DateTimeImmutable('2026-03-09 14:00:00'),
             end: new DateTimeImmutable('2026-03-09 15:00:00'),
             participantCount: 3,
             organizerEmail: 'alice@example.com',
-        );
-
-        $reservationId = $useCase->execute($command);
+        ));
 
         self::assertNotNull($reservationId);
     }

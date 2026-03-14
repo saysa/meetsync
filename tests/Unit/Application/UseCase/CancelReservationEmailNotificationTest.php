@@ -10,10 +10,8 @@ use App\Domain\Clock\ClockInterface;
 use App\Domain\Exception\NotTheOrganizerException;
 use App\Domain\Notification\EmailNotifierInterface;
 use App\Domain\Reservation\Reservation;
-use App\Domain\Reservation\ReservationId;
-use App\Domain\Reservation\ReservationRepositoryInterface;
 use App\Domain\Reservation\ReservationSnapshot;
-use App\Domain\Reservation\RoomId;
+use App\Tests\Fixtures\InMemoryReservationRepository;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -48,24 +46,6 @@ final class CancelReservationEmailNotificationTest extends TestCase
                 DateTimeImmutable $start,
                 DateTimeImmutable $end,
             ): void {}
-        };
-    }
-
-    private function reservationRepository(Reservation $reservation): ReservationRepositoryInterface
-    {
-        return new class ($reservation) implements ReservationRepositoryInterface {
-            public function __construct(private Reservation $reservation) {}
-
-            public function findByRoomId(RoomId $roomId): array { return []; }
-
-            public function findById(ReservationId $id): ?Reservation
-            {
-                return $this->reservation;
-            }
-
-            public function save(Reservation $reservation): void {}
-
-            public function findByOrganizerId(string $organizerId): array { return []; }
         };
     }
 
@@ -104,19 +84,20 @@ final class CancelReservationEmailNotificationTest extends TestCase
             }
         };
 
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($this->aliceConfirmedReservation());
+
         $useCase = new CancelReservationUseCase(
-            reservationRepository: $this->reservationRepository($this->aliceConfirmedReservation()),
+            reservationRepository: $reservationRepository,
             clock: $this->fixedClock(),
             emailNotifier: $spy,
         );
 
-        $command = new CancelReservationCommand(
+        $useCase->execute(new CancelReservationCommand(
             reservationId: 'res-1',
             requesterId: 'alice',
             requesterEmail: 'alice@example.com',
-        );
-
-        $useCase->execute($command);
+        ));
 
         self::assertSame('alice@example.com', $spy->cancellationSentTo);
     }
@@ -144,20 +125,21 @@ final class CancelReservationEmailNotificationTest extends TestCase
             }
         };
 
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($this->aliceConfirmedReservation());
+
         $useCase = new CancelReservationUseCase(
-            reservationRepository: $this->reservationRepository($this->aliceConfirmedReservation()),
+            reservationRepository: $reservationRepository,
             clock: $this->fixedClock(),
             emailNotifier: $spy,
         );
 
-        $command = new CancelReservationCommand(
+        $this->expectException(NotTheOrganizerException::class);
+        $useCase->execute(new CancelReservationCommand(
             reservationId: 'res-1',
             requesterId: 'bob',
             requesterEmail: 'bob@example.com',
-        );
-
-        $this->expectException(NotTheOrganizerException::class);
-        $useCase->execute($command);
+        ));
 
         self::assertNull($spy->cancellationSentTo);
     }
@@ -183,41 +165,22 @@ final class CancelReservationEmailNotificationTest extends TestCase
             }
         };
 
-        $capturingRepository = new class ($this->aliceConfirmedReservation()) implements ReservationRepositoryInterface {
-            public ?Reservation $saved = null;
-
-            public function __construct(private Reservation $reservation) {}
-
-            public function findByRoomId(RoomId $roomId): array { return []; }
-
-            public function findById(ReservationId $id): ?Reservation
-            {
-                return $this->reservation;
-            }
-
-            public function save(Reservation $reservation): void
-            {
-                $this->saved = $reservation;
-            }
-
-            public function findByOrganizerId(string $organizerId): array { return []; }
-        };
+        $reservationRepository = new InMemoryReservationRepository();
+        $reservationRepository->add($this->aliceConfirmedReservation());
 
         $useCase = new CancelReservationUseCase(
-            reservationRepository: $capturingRepository,
+            reservationRepository: $reservationRepository,
             clock: $this->fixedClock(),
             emailNotifier: $failingNotifier,
         );
 
-        $command = new CancelReservationCommand(
+        $useCase->execute(new CancelReservationCommand(
             reservationId: 'res-1',
             requesterId: 'alice',
             requesterEmail: 'alice@example.com',
-        );
+        ));
 
-        $useCase->execute($command);
-
-        self::assertNotNull($capturingRepository->saved);
-        self::assertTrue($capturingRepository->saved->isCancelled());
+        self::assertNotNull($reservationRepository->lastSaved);
+        self::assertTrue($reservationRepository->lastSaved->isCancelled());
     }
 }
