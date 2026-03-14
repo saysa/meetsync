@@ -11,6 +11,8 @@ use Symfony\Component\Mime\Email;
 
 final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
 {
+    private const string SENDER = 'noreply@meetsync.app';
+
     public function __construct(private readonly MailerInterface $mailer) {}
 
     public function sendConfirmation(
@@ -19,8 +21,13 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
         DateTimeImmutable $start,
         DateTimeImmutable $end,
     ): void {
-        $email = (new Email())->from('noreply@meetsync.app')->to($organizerEmail)->subject('Booking confirmed')->text('ok');
-        $this->mailer->send($email);
+        $this->mailer->send(
+            (new Email())
+                ->from(self::SENDER)
+                ->to($organizerEmail)
+                ->subject('Booking confirmed')
+                ->text('ok'),
+        );
     }
 
     public function sendCancellation(
