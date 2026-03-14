@@ -68,7 +68,7 @@ The `from` address is an adapter-level concern (not mandated by the port interfa
 
 | # | Status | Test |
 |---|---|---|
-| 1 | | should deliver exactly one email to the organizer when a booking confirmation is requested |
+| 1 | ✅ DONE | should deliver exactly one email to the organizer when a booking confirmation is requested |
 | 2 | | should use a subject that identifies the reservation as confirmed when a booking confirmation is requested |
 | 3 | | should include the room identifier and the time window in the body when a booking confirmation is requested |
 | 4 | | should deliver exactly one email to the organizer when a cancellation notification is requested |
