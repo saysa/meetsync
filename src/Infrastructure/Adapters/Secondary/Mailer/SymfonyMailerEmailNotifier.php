@@ -13,6 +13,7 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
 {
     private const string SENDER = 'noreply@meetsync.app';
     private const string CONFIRMATION_SUBJECT = 'Booking confirmed';
+    private const string CANCELLATION_SUBJECT = 'Booking cancelled';
 
     public function __construct(private readonly MailerInterface $mailer) {}
 
@@ -22,13 +23,7 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
         DateTimeImmutable $start,
         DateTimeImmutable $end,
     ): void {
-        $this->mailer->send(
-            (new Email())
-                ->from(self::SENDER)
-                ->to($organizerEmail)
-                ->subject(self::CONFIRMATION_SUBJECT)
-                ->text($this->buildBody($roomId, $start, $end)),
-        );
+        $this->dispatch($organizerEmail, self::CONFIRMATION_SUBJECT, $this->buildBody($roomId, $start, $end));
     }
 
     public function sendCancellation(
@@ -37,12 +32,17 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
         DateTimeImmutable $start,
         DateTimeImmutable $end,
     ): void {
+        $this->dispatch($organizerEmail, self::CANCELLATION_SUBJECT, $this->buildBody($roomId, $start, $end));
+    }
+
+    private function dispatch(string $to, string $subject, string $body): void
+    {
         $this->mailer->send(
             (new Email())
                 ->from(self::SENDER)
-                ->to($organizerEmail)
-                ->subject('Booking cancelled')
-                ->text($this->buildBody($roomId, $start, $end)),
+                ->to($to)
+                ->subject($subject)
+                ->text($body),
         );
     }
 
