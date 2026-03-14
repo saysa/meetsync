@@ -52,6 +52,22 @@ final class DoctrineRoomRepositoryTest extends KernelTestCase
     }
 
     #[Test]
+    public function should_preserve_the_capacity_and_the_operating_hours_of_a_room_exactly_when_it_is_retrieved(): void
+    {
+        // Given
+        $this->seedRoom(id: 'louvre', capacity: 20, openingTime: '08:00', closingTime: '19:00');
+
+        // When
+        $snapshot = $this->repository->findById(new RoomId('louvre'))->toSnapshot();
+
+        // Then
+        self::assertSame('louvre', $snapshot->id);
+        self::assertSame(20,       $snapshot->capacity);
+        self::assertSame('08:00',  $snapshot->openingTime->format('H:i'));
+        self::assertSame('19:00',  $snapshot->closingTime->format('H:i'));
+    }
+
+    #[Test]
     public function should_return_nothing_when_looking_up_a_room_identifier_that_does_not_exist_in_the_database(): void
     {
         // Given — empty table (guaranteed by transaction rollback from tearDown)
