@@ -12,6 +12,7 @@ use Symfony\Component\Mime\Email;
 final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
 {
     private const string SENDER = 'noreply@meetsync.app';
+    private const string CONFIRMATION_SUBJECT = 'Booking confirmed';
 
     public function __construct(private readonly MailerInterface $mailer) {}
 
@@ -25,8 +26,8 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
             (new Email())
                 ->from(self::SENDER)
                 ->to($organizerEmail)
-                ->subject('Booking confirmed')
-                ->text('Room: '.$roomId.' on '.$start->format('Y-m-d').' from '.$start->format('H:i').' to '.$end->format('H:i')),
+                ->subject(self::CONFIRMATION_SUBJECT)
+                ->text($this->buildBody($roomId, $start, $end)),
         );
     }
 
@@ -36,5 +37,16 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
         DateTimeImmutable $start,
         DateTimeImmutable $end,
     ): void {
+    }
+
+    private function buildBody(string $roomId, DateTimeImmutable $start, DateTimeImmutable $end): string
+    {
+        return sprintf(
+            'Room: %s on %s from %s to %s',
+            $roomId,
+            $start->format('Y-m-d'),
+            $start->format('H:i'),
+            $end->format('H:i'),
+        );
     }
 }
