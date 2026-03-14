@@ -37,6 +37,13 @@ final class SymfonyMailerEmailNotifier implements EmailNotifierInterface
         DateTimeImmutable $start,
         DateTimeImmutable $end,
     ): void {
+        $this->mailer->send(
+            (new Email())
+                ->from(self::SENDER)
+                ->to($organizerEmail)
+                ->subject('Booking cancelled')
+                ->text($this->buildBody($roomId, $start, $end)),
+        );
     }
 
     private function buildBody(string $roomId, DateTimeImmutable $start, DateTimeImmutable $end): string
