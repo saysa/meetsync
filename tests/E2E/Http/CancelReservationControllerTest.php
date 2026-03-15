@@ -78,4 +78,33 @@ final class CancelReservationControllerTest extends WebTestCase
         // Then
         self::assertResponseStatusCodeSame(404);
     }
+
+    #[Test]
+    public function should_return_403_when_someone_other_than_the_organizer_attempts_to_cancel(): void
+    {
+        // Given
+        $this->clock->setNow(new DateTimeImmutable('2026-03-09 08:00:00 UTC'));
+        $this->reservationRepository->add(Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-001',
+            roomId: 'eiffel',
+            organizerId: 'alice.martin@acme.com',
+            status: 'confirmed',
+            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+        )));
+
+        // When
+        $this->client->request(
+            method: 'DELETE',
+            uri: '/reservations/res-001',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'requester_id' => 'bob.chen@acme.com',
+                'requester_email' => 'bob.chen@acme.com',
+            ]),
+        );
+
+        // Then
+        self::assertResponseStatusCodeSame(403);
+    }
 }
