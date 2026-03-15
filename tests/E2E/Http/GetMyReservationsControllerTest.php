@@ -121,4 +121,39 @@ final class GetMyReservationsControllerTest extends WebTestCase
         self::assertCount(1, $data);
         self::assertSame('res-future', $data[0]['reservation_id']);
     }
+
+    #[Test]
+    public function should_return_200_with_only_the_requesting_organizers_reservations(): void
+    {
+        // Given
+        $this->clock->setNow(new DateTimeImmutable('2026-03-09 08:00:00 UTC'));
+        $this->reservationRepository->add(Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-alice',
+            roomId: 'eiffel',
+            organizerId: 'alice.martin@acme.com',
+            status: 'confirmed',
+            start: new DateTimeImmutable('2026-03-09 14:00:00'),
+            end: new DateTimeImmutable('2026-03-09 15:00:00'),
+        )));
+        $this->reservationRepository->add(Reservation::fromSnapshot(new ReservationSnapshot(
+            id: 'res-bob',
+            roomId: 'louvre',
+            organizerId: 'bob.chen@acme.com',
+            status: 'confirmed',
+            start: new DateTimeImmutable('2026-03-11 09:00:00'),
+            end: new DateTimeImmutable('2026-03-11 10:00:00'),
+        )));
+
+        // When
+        $this->client->request(
+            method: 'GET',
+            uri: '/reservations?organizer_id=alice.martin@acme.com',
+        );
+
+        // Then
+        self::assertResponseStatusCodeSame(200);
+        $data = json_decode($this->client->getResponse()->getContent(), true);
+        self::assertCount(1, $data);
+        self::assertSame('res-alice', $data[0]['reservation_id']);
+    }
 }
