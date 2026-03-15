@@ -27,6 +27,7 @@ jobs:
           --health-retries 5
 
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       APP_ENV: test
       DATABASE_URL: "postgresql://meetsync:meetsync@localhost:5432/meetsync_test?serverVersion=13&charset=utf8"
 
@@ -34,7 +35,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v3
+        uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: pdo_pgsql, intl, zip, gd, opcache, xml, mbstring, apcu, pcov
