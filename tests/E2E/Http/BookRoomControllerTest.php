@@ -128,4 +128,34 @@ final class BookRoomControllerTest extends WebTestCase
         // Then
         self::assertResponseStatusCodeSame(409);
     }
+
+    #[Test]
+    public function should_return_422_when_the_participant_count_exceeds_the_room_capacity(): void
+    {
+        // Given
+        $this->clock->setNow(new DateTimeImmutable('2026-03-09 08:00:00 UTC'));
+        $this->roomRepository->add(Room::fromSnapshot(new RoomSnapshot(
+            id: 'montmartre',
+            capacity: 4,
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+        )));
+
+        // When
+        $this->client->request(
+            method: 'POST',
+            uri: '/reservations',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'room_id' => 'montmartre',
+                'start' => '2026-03-09T14:00:00+00:00',
+                'end' => '2026-03-09T15:30:00+00:00',
+                'participant_count' => 5,
+                'organizer_email' => 'alice.martin@acme.com',
+            ]),
+        );
+
+        // Then
+        self::assertResponseStatusCodeSame(422);
+    }
 }
