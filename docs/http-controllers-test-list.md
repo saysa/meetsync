@@ -278,9 +278,9 @@ Success response: `200 OK` + JSON array of reservation objects
 | 5 | should return 422 when the booking start time is more than 90 days in the future | ✅ DONE |
 | 6 | should return 422 when the booking start time is fewer than 30 minutes from now | ✅ DONE |
 | 7 | should return 422 when the requested timeslot falls outside the building operating hours | ✅ DONE |
-| 8 | should return 204 when the organizer cancels a confirmed reservation before it starts | NOT DONE |
-| 9 | should return 404 when attempting to cancel a reservation that does not exist | NOT DONE |
-| 10 | should return 403 when someone other than the organizer attempts to cancel a reservation | NOT DONE |
+| 8 | should return 204 when the organizer cancels a confirmed reservation before it starts | ✅ DONE |
+| 9 | should return 404 when attempting to cancel a reservation that does not exist | ✅ DONE |
+| 10 | should return 403 when someone other than the organizer attempts to cancel a reservation | ✅ DONE |
 | 11 | should return 409 when the organizer attempts to cancel a reservation that has already started | NOT DONE |
 | 12 | should return 200 with an empty list when the organizer has no upcoming reservations | NOT DONE |
 | 13 | should return 200 with the organizer's upcoming reservations ordered by start time when reservations exist | NOT DONE |
