@@ -73,7 +73,7 @@ The `from` address is an adapter-level concern (not mandated by the port interfa
 | 3 | ✅ DONE | should include the room identifier and the time window in the body when a booking confirmation is requested |
 | 4 | ✅ DONE | should deliver exactly one email to the organizer when a cancellation notification is requested |
 | 5 | ✅ DONE | should use a subject that identifies the reservation as cancelled when a cancellation notification is requested |
-| 6 | | should include the room identifier and the time window in the body when a cancellation notification is requested |
+| 6 | ✅ DONE | should include the room identifier and the time window in the body when a cancellation notification is requested |
 
 ---
 
