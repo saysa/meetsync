@@ -188,4 +188,34 @@ final class BookRoomControllerTest extends WebTestCase
         // Then
         self::assertResponseStatusCodeSame(422);
     }
+
+    #[Test]
+    public function should_return_422_when_the_booking_start_time_is_fewer_than_30_minutes_from_now(): void
+    {
+        // Given
+        $this->clock->setNow(new DateTimeImmutable('2026-03-09 09:40:00 UTC'));
+        $this->roomRepository->add(Room::fromSnapshot(new RoomSnapshot(
+            id: 'eiffel',
+            capacity: 20,
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+        )));
+
+        // When
+        $this->client->request(
+            method: 'POST',
+            uri: '/reservations',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'room_id' => 'eiffel',
+                'start' => '2026-03-09T10:00:00+00:00',
+                'end' => '2026-03-09T11:00:00+00:00',
+                'participant_count' => 2,
+                'organizer_email' => 'alice.martin@acme.com',
+            ]),
+        );
+
+        // Then
+        self::assertResponseStatusCodeSame(422);
+    }
 }
