@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    name: Tests & Quality
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: meetsync_test
+          POSTGRES_USER: meetsync
+          POSTGRES_PASSWORD: meetsync
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U meetsync -d meetsync_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "postgresql://meetsync:meetsync@localhost:5432/meetsync_test?serverVersion=13&charset=utf8"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, intl, zip, gd, opcache, xml, mbstring, apcu, pcov
+          coverage: pcov
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit
+
+      - name: Infection (Unit)
+        run: vendor/bin/infection --min-msi=95 --min-covered-msi=98 --no-progress
+
+      - name: Infection (E2E controllers)
+        run: vendor/bin/infection --test-framework-options="--testsuite=E2E" --filter="Infrastructure/Adapters/Primary" --min-msi=95 --no-progress
+
+      - name: DepTrac
+        run: php -d error_reporting=0 vendor/bin/deptrac analyse --config-file=deptrac.yaml

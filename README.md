@@ -1,5 +1,7 @@
 # MeetSync — Enterprise Meeting Room Reservation
 
+[![CI](https://github.com/saysa/meetsync/actions/workflows/ci.yml/badge.svg)](https://github.com/saysa/meetsync/actions/workflows/ci.yml)
+
 SaaS platform for managing meeting room reservations. Built with strict TDD discipline, Hexagonal Architecture, and DDD — every design decision is traceable through 284 commits.
 
 ```
