@@ -36,8 +36,8 @@ final class BookRoomControllerTest extends WebTestCase
         $this->roomRepository->add(Room::fromSnapshot(new RoomSnapshot(
             id: 'eiffel',
             capacity: 20,
-            openingTime: new DateTimeImmutable('08:00:00'),
-            closingTime: new DateTimeImmutable('19:00:00'),
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
         )));
 
         // When

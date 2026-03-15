@@ -42,3 +42,6 @@ when@test:
         App\Domain\Reservation\RoomRepositoryInterface:
             alias: App\Tests\Fixtures\InMemoryRoomRepository
             public: true
+        App\Domain\Notification\EmailNotifierInterface:
+            alias: App\Infrastructure\Adapters\Secondary\Mailer\SymfonyMailerEmailNotifier
+            public: true
