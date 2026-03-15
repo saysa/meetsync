@@ -23,7 +23,7 @@ final class BookRoomController
             start: new DateTimeImmutable($data['start']),
             end: new DateTimeImmutable($data['end']),
             participantCount: $data['participant_count'],
-            organizerEmail: $data['organizer_email'] ?? '',
+            organizerEmail: $data['organizer_email'],
         ));
 
         return new JsonResponse(['reservation_id' => $reservationId->value], 201);

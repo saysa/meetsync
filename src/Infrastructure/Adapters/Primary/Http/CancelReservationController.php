@@ -20,7 +20,7 @@ final class CancelReservationController
         $useCase->execute(new CancelReservationCommand(
             reservationId: $id,
             requesterId: $data['requester_id'],
-            requesterEmail: $data['requester_email'] ?? '',
+            requesterEmail: $data['requester_email'],
         ));
 
         return new Response(null, 204);
