@@ -218,4 +218,34 @@ final class BookRoomControllerTest extends WebTestCase
         // Then
         self::assertResponseStatusCodeSame(422);
     }
+
+    #[Test]
+    public function should_return_422_when_the_requested_timeslot_falls_outside_the_building_operating_hours(): void
+    {
+        // Given
+        $this->clock->setNow(new DateTimeImmutable('2026-03-09 07:00:00 UTC'));
+        $this->roomRepository->add(Room::fromSnapshot(new RoomSnapshot(
+            id: 'eiffel',
+            capacity: 20,
+            openingTime: new DateTimeImmutable('2026-03-09 08:00:00'),
+            closingTime: new DateTimeImmutable('2026-03-09 19:00:00'),
+        )));
+
+        // When
+        $this->client->request(
+            method: 'POST',
+            uri: '/reservations',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'room_id' => 'eiffel',
+                'start' => '2026-03-09T07:30:00+00:00',
+                'end' => '2026-03-09T09:00:00+00:00',
+                'participant_count' => 2,
+                'organizer_email' => 'alice.martin@acme.com',
+            ]),
+        );
+
+        // Then
+        self::assertResponseStatusCodeSame(422);
+    }
 }
