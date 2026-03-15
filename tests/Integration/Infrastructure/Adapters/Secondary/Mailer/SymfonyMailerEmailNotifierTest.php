@@ -112,4 +112,27 @@ final class SymfonyMailerEmailNotifierTest extends KernelTestCase
         $email = $this->getMailerMessage(0);
         self::assertEmailSubjectContains($email, 'cancelled');
     }
+
+    #[Test]
+    public function should_include_the_room_identifier_and_the_time_window_in_the_body_when_a_cancellation_notification_is_requested(): void
+    {
+        // Given
+        $notifier = static::getContainer()->get(SymfonyMailerEmailNotifier::class);
+
+        // When
+        $notifier->sendCancellation(
+            organizerEmail: 'alice@example.com',
+            roomId: 'eiffel',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        );
+
+        // Then
+        self::assertEmailCount(1);
+        $email = $this->getMailerMessage(0);
+        self::assertEmailTextBodyContains($email, 'eiffel');
+        self::assertEmailTextBodyContains($email, '2026-03-09');
+        self::assertEmailTextBodyContains($email, '10:00');
+        self::assertEmailTextBodyContains($email, '11:00');
+    }
 }
