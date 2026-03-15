@@ -7,6 +7,7 @@ namespace App\Infrastructure\Adapters\Primary\Http;
 use App\Application\Command\BookRoomCommand;
 use App\Application\Exception\RoomNotFoundException;
 use App\Application\UseCase\BookRoomUseCase;
+use App\Domain\Exception\TimeslotConflictException;
 use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +30,8 @@ final class BookRoomController
             ));
         } catch (RoomNotFoundException) {
             return new JsonResponse(null, 404);
+        } catch (TimeslotConflictException) {
+            return new JsonResponse(null, 409);
         }
 
         return new JsonResponse(['reservation_id' => $reservationId->value], 201);
