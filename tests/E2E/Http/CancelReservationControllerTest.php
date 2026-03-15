@@ -56,4 +56,26 @@ final class CancelReservationControllerTest extends WebTestCase
         // Then
         self::assertResponseStatusCodeSame(204);
     }
+
+    #[Test]
+    public function should_return_404_when_attempting_to_cancel_a_reservation_that_does_not_exist(): void
+    {
+        // Given
+        $this->clock->setNow(new DateTimeImmutable('2026-03-09 08:00:00 UTC'));
+        // No reservation seeded
+
+        // When
+        $this->client->request(
+            method: 'DELETE',
+            uri: '/reservations/non-existent-id',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'requester_id' => 'alice.martin@acme.com',
+                'requester_email' => 'alice.martin@acme.com',
+            ]),
+        );
+
+        // Then
+        self::assertResponseStatusCodeSame(404);
+    }
 }
