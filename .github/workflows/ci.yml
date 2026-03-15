@@ -31,10 +31,10 @@ jobs:
       DATABASE_URL: "postgresql://meetsync:meetsync@localhost:5432/meetsync_test?serverVersion=13&charset=utf8"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@v3
         with:
           php-version: '8.4'
           extensions: pdo_pgsql, intl, zip, gd, opcache, xml, mbstring, apcu, pcov
