@@ -92,4 +92,24 @@ final class SymfonyMailerEmailNotifierTest extends KernelTestCase
         $email = $this->getMailerMessage(0);
         self::assertEmailAddressContains($email, 'to', 'alice@example.com');
     }
+
+    #[Test]
+    public function should_use_a_subject_that_identifies_the_reservation_as_cancelled_when_a_cancellation_notification_is_requested(): void
+    {
+        // Given
+        $notifier = static::getContainer()->get(SymfonyMailerEmailNotifier::class);
+
+        // When
+        $notifier->sendCancellation(
+            organizerEmail: 'alice@example.com',
+            roomId: 'eiffel',
+            start: new \DateTimeImmutable('2026-03-09 10:00:00 UTC'),
+            end: new \DateTimeImmutable('2026-03-09 11:00:00 UTC'),
+        );
+
+        // Then
+        self::assertEmailCount(1);
+        $email = $this->getMailerMessage(0);
+        self::assertEmailSubjectContains($email, 'cancelled');
+    }
 }
