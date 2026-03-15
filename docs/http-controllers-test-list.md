@@ -272,8 +272,8 @@ Success response: `200 OK` + JSON array of reservation objects
 | # | Test | Status |
 |---|---|---|
 | 1 | should return 201 with a reservation identifier when booking a free room with valid data | ✅ DONE |
-| 2 | should return 404 when booking a room that does not exist in the system | NOT DONE |
-| 3 | should return 409 when the requested timeslot conflicts with an existing confirmed reservation for the same room | NOT DONE |
+| 2 | should return 404 when booking a room that does not exist in the system | ✅ DONE |
+| 3 | should return 409 when the requested timeslot conflicts with an existing confirmed reservation for the same room | ✅ DONE |
 | 4 | should return 422 when the participant count exceeds the room capacity | NOT DONE |
 | 5 | should return 422 when the booking start time is more than 90 days in the future | NOT DONE |
 | 6 | should return 422 when the booking start time is fewer than 30 minutes from now | NOT DONE |
