@@ -285,4 +285,4 @@ Success response: `200 OK` + JSON array of reservation objects
 | 12 | should return 200 with an empty list when the organizer has no upcoming reservations | ✅ DONE |
 | 13 | should return 200 with the organizer's upcoming reservations ordered by start time when reservations exist | ✅ DONE |
 | 14 | should return 200 with only future reservations when past reservations also exist for the organizer | ✅ DONE |
-| 15 | should return 200 with only the requesting organizer's reservations when multiple organizers have bookings | NOT DONE |
+| 15 | should return 200 with only the requesting organizer's reservations when multiple organizers have bookings | ✅ DONE |
