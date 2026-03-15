@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Adapters\Primary\Http;
 
 use App\Application\Command\BookRoomCommand;
-use App\Application\Exception\RoomNotFoundException;
 use App\Application\UseCase\BookRoomUseCase;
-use App\Domain\Exception\TimeslotConflictException;
 use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,19 +18,13 @@ final class BookRoomController
     {
         $data = json_decode($request->getContent(), true);
 
-        try {
-            $reservationId = $useCase->execute(new BookRoomCommand(
-                roomId: $data['room_id'],
-                start: new DateTimeImmutable($data['start']),
-                end: new DateTimeImmutable($data['end']),
-                participantCount: $data['participant_count'],
-                organizerEmail: $data['organizer_email'] ?? '',
-            ));
-        } catch (RoomNotFoundException) {
-            return new JsonResponse(null, 404);
-        } catch (TimeslotConflictException) {
-            return new JsonResponse(null, 409);
-        }
+        $reservationId = $useCase->execute(new BookRoomCommand(
+            roomId: $data['room_id'],
+            start: new DateTimeImmutable($data['start']),
+            end: new DateTimeImmutable($data['end']),
+            participantCount: $data['participant_count'],
+            organizerEmail: $data['organizer_email'] ?? '',
+        ));
 
         return new JsonResponse(['reservation_id' => $reservationId->value], 201);
     }
