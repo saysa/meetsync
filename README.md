@@ -1,30 +1,57 @@
 # MeetSync — Enterprise Meeting Room Reservation
 
-> SaaS platform for managing meeting room reservations across large multi-tenant organisations.
+SaaS platform for managing meeting room reservations. Built with strict TDD discipline, Hexagonal Architecture, and DDD — every design decision is traceable through 284 commits.
+
+```
+83 tests | 142 assertions | MSI 100% | 0 DepTrac violations
+```
 
 ---
 
-## Architecture & Methodology
+## Architecture
 
-> "AI without discipline creates technical debt faster."
-
-**TDD — strict baby-steps discipline**
-RED → GREEN → REFACTOR, one test at a time. Each step is a separate commit.
-Test ordering follows TPP (Transformation Priority Premise). Test names follow FLFI (Final Label, First Implementation) — business language only, no technical terms.
-
-**Hexagonal Architecture (Ports & Adapters)**
-The domain core has zero dependencies on frameworks or infrastructure.
-Bounded Contexts map directly to `src/Domain/` sub-namespaces (Screaming Architecture).
-Application layer orchestrates use cases via Commands and Queries (CQRS).
-
-**DDD**
-Aggregates enforce invariants. Value Objects are immutable and self-validating.
-Repositories are domain ports — no Doctrine leaking into the domain.
-
-**Methodology pipeline**
 ```
-Event Storming → BDD (Three Amigos) → tdd-analyze (TPP test list) → TDD cycles → Mutation Testing
+                         ┌─────────────────────────────────────────┐
+                         │            HTTP (Symfony)                │
+                         │  POST /reservations                     │
+                         │  DELETE /reservations/{id}               │
+                         │  GET /reservations?organizer_id=...      │
+                         └────────────────┬────────────────────────┘
+                                          │ Primary Adapters
+                         ┌────────────────▼────────────────────────┐
+                         │          Application Layer              │
+                         │  BookRoomUseCase                        │
+                         │  CancelReservationUseCase               │
+                         │  GetMyReservationsUseCase               │
+                         └────────────────┬────────────────────────┘
+                                          │ Ports (interfaces)
+                         ┌────────────────▼────────────────────────┐
+                         │           Domain Layer                  │
+                         │  Reservation (aggregate)                │
+                         │  Timeslot, Room, RoomId (value objects) │
+                         │  Zero framework dependencies            │
+                         └────────────────┬────────────────────────┘
+                                          │ Secondary Adapters
+                         ┌────────────────▼────────────────────────┐
+                         │          Infrastructure                 │
+                         │  DoctrineReservationRepository          │
+                         │  DoctrineRoomRepository                 │
+                         │  SymfonyMailerEmailNotifier             │
+                         │  SystemClock                            │
+                         └─────────────────────────────────────────┘
 ```
+
+DepTrac enforces layer boundaries at CI level — Domain depends on nothing, Application on Domain only, Infrastructure on both.
+
+---
+
+## Methodology
+
+```
+Event Storming → BDD (Three Amigos) → Lean Startup scoping → TDD-analyze → TDD cycles → Mutation Testing
+```
+
+Each feature follows the full pipeline. Each TDD step is a separate commit (`go red` / `go green` / `clean`), visible in git history — no retroactive testing.
 
 ---
 
@@ -33,187 +60,160 @@ Event Storming → BDD (Three Amigos) → tdd-analyze (TPP test list) → TDD cy
 | Layer | Technology |
 |---|---|
 | Language | PHP 8.4 |
-| Framework | Symfony 7 LTS |
-| Database | PostgreSQL |
+| Framework | Symfony 7.4 LTS |
+| Database | PostgreSQL 13 |
+| ORM | Doctrine 3.6 |
 | Tests | PHPUnit 12 |
-| Mutation Testing | Infection (target: ≥ 95% MSI) |
-| Static Analysis | PHPStan Level 8 |
+| Mutation Testing | Infection (MSI 100%) |
+| Architecture | DepTrac (0 violations) |
 | Runtime | Docker (PHP-FPM + Nginx) |
 
 ---
 
-## Run tests
+## API Endpoints
 
-```bash
-make test           # full test suite (spins up Docker + PostgreSQL)
-make test-coverage  # test suite + HTML coverage report (pcov)
-make shell          # open a shell in the app container
+### POST /reservations — Book a room
+
+```json
+// Request
+{ "room_id": "eiffel", "start": "2026-03-09T14:00:00+00:00",
+  "end": "2026-03-09T15:30:00+00:00", "participant_count": 3,
+  "organizer_email": "alice.martin@acme.com" }
+
+// 201 Created
+{ "reservation_id": "550e8400-e29b-41d4-a716-446655440000" }
 ```
+
+| Error | Status |
+|---|---|
+| Room not found | 404 |
+| Timeslot conflict | 409 |
+| Capacity exceeded | 422 |
+| Outside operating hours | 422 |
+| Booking horizon exceeded (90d) | 422 |
+| Insufficient advance notice (30min) | 422 |
+
+### DELETE /reservations/{id} — Cancel a reservation
+
+```json
+// Request body
+{ "requester_id": "alice.martin@acme.com",
+  "requester_email": "alice.martin@acme.com" }
+
+// 204 No Content
+```
+
+| Error | Status |
+|---|---|
+| Reservation not found | 404 |
+| Not the organizer | 403 |
+| Already started | 409 |
+
+### GET /reservations?organizer_id=... — View my reservations
+
+```json
+// 200 OK
+[{ "reservation_id": "...", "room_id": "eiffel",
+   "start": "2026-03-09T14:00:00+00:00",
+   "end": "2026-03-09T15:30:00+00:00", "status": "confirmed" }]
+```
+
+Returns only future reservations for the requesting organizer, ordered by start time.
 
 ---
 
-## Project structure
+## Project Structure
 
 ```
 src/
-├── Domain/
-│   ├── Clock/
-│   │   └── ClockInterface.php          # port — time abstraction
-│   ├── Exception/
-│   │   ├── DomainException.php
-│   │   ├── BookingHorizonExceededException.php
-│   │   ├── InsufficientAdvanceNoticeException.php
-│   │   ├── InvalidTimeslotException.php
-│   │   ├── NotTheOrganizerException.php
-│   │   ├── ReservationAlreadyStartedException.php
-│   │   ├── RoomCapacityExceededException.php
-│   │   └── TimeslotConflictException.php
-│   └── Reservation/
-│       ├── Reservation.php             # aggregate
-│       ├── ReservationId.php           # value object
-│       ├── ReservationRepositoryInterface.php
-│       ├── Room.php                    # value object
-│       ├── RoomId.php                  # value object
-│       ├── RoomRepositoryInterface.php
-│       └── Timeslot.php                # value object
+├── Domain/                              # Zero dependencies
+│   ├── Clock/ClockInterface.php         # Port
+│   ├── Exception/                       # 8 domain exceptions
+│   ├── Notification/EmailNotifierInterface.php  # Port
+│   └── Reservation/                     # Aggregate + VOs
+│       ├── Reservation.php              # Aggregate root (snapshot pattern)
+│       ├── Timeslot.php                 # VO — half-open interval [start, end)
+│       ├── Room.php, RoomId.php         # VO — capacity + operating hours
+│       ├── ReservationId.php            # VO — UUID
+│       └── *RepositoryInterface.php     # Ports
 ├── Application/
-│   ├── Command/
-│   │   ├── BookRoomCommand.php
-│   │   └── CancelReservationCommand.php
-│   ├── Exception/
-│   │   ├── ApplicationException.php
-│   │   ├── ReservationNotFoundException.php
-│   │   └── RoomNotFoundException.php
-│   ├── Query/
-│   │   └── GetMyReservationsQuery.php
-│   └── UseCase/
-│       ├── BookRoomUseCase.php
-│       ├── CancelReservationUseCase.php
-│       └── GetMyReservationsUseCase.php
-└── Controller/                         # (pending — HTTP adapters not yet implemented)
+│   ├── Command/                         # BookRoomCommand, CancelReservationCommand
+│   ├── Query/                           # GetMyReservationsQuery
+│   ├── UseCase/                         # 3 use cases
+│   └── Exception/                       # RoomNotFound, ReservationNotFound
+└── Infrastructure/Adapters/
+    ├── Primary/Http/                    # 3 controllers + DomainExceptionListener
+    └── Secondary/
+        ├── Doctrine/                    # Repositories + ORM entities
+        ├── Mailer/                      # SymfonyMailerEmailNotifier
+        └── Clock/                       # SystemClock
 ```
 
 ---
 
-## Business Specification
+## Test Pyramid
 
-# SPEC – MeetSync: Enterprise Meeting Room Reservation
+| Level | Tests | What it validates |
+|---|---|---|
+| Unit | 50 | Domain logic, use cases (in-memory fakes) |
+| Integration | 18 | Doctrine repositories, Symfony Mailer (real PostgreSQL) |
+| E2E | 15 | HTTP request/response through full stack (WebTestCase) |
+| **Total** | **83** | **142 assertions** |
 
-## Introduction – MeetSync
-
-**MeetSync** is a SaaS platform for managing meeting room reservations across large organizations.
-When an employee needs a space for a meeting, they create a reservation that goes through a process including availability checking, conflict detection, optional approval, and confirmation.
-
-The system must enforce many business rules depending on:
-- the room capacity and equipment,
-- the reservation duration and recurrence pattern,
-- the tenant's booking policies (advance notice, horizon, approval rules),
-- the check-in behavior and no-show handling,
-- and the participant count at the time of booking.
-
-The goal of the project is to build a robust, testable and evolvable system capable of managing these business rules reliably across multiple tenants.
+Mutation testing (Infection) validates that every test actually catches regressions — not just line coverage.
 
 ---
 
-## Bounded Context 1 – Reservation Management
+## Quick Start
 
-### Creating a reservation
-1. When an employee requests a room, a reservation is created with the room, organizer, timeslot, and participant list.
-2. A reservation can only be created if the room exists and belongs to the tenant.
-3. A reservation starts with status PENDING, unless a rule imposes immediate rejection.
-4. If the requested timeslot is already occupied by another reservation for the same room, the reservation is immediately rejected.
-5. If the number of participants exceeds the room capacity, the reservation is immediately rejected.
-6. A reservation cannot be created outside the building's operating hours.
-7. A reservation cannot be created beyond the tenant's booking horizon (e.g. maximum 90 days in advance).
-8. A reservation cannot be created with less than the tenant's minimum advance notice (e.g. at least 30 minutes before start).
+```bash
+make test              # Full test suite (Docker + PostgreSQL)
+make test-coverage     # Tests + HTML coverage report
+make deptrac           # Verify architecture constraints
+make shell             # Shell into the app container
+```
 
-### Recurring reservations
-9. A reservation can follow a recurrence pattern: daily, weekly, monthly, or custom.
-10. Each occurrence of a recurring series is an independent reservation linked to the series.
-11. A conflict in one occurrence does not block the entire series — the system schedules what it can and reports the conflicts.
-12. Modifying a single occurrence does not affect the rest of the series.
-13. Modifying the series after occurrence N only affects future occurrences.
-14. Cancelling the series cancels all future uncommenced occurrences.
-
-### Approval workflow
-15. Some rooms require explicit approval before a reservation is confirmed.
-16. When approval is required, the reservation transitions to status PENDING_APPROVAL.
-17. A pending approval holds the timeslot as a soft lock for a configurable duration.
-18. If the approval window expires without a decision, the reservation is automatically cancelled.
-19. A reservation cannot be confirmed without approval when the room requires it.
-20. The approver can approve, reject, or propose an alternative timeslot.
-
-### Check-in and no-show
-21. After confirmation, the organizer must check in within a configurable window around the start time.
-22. If no check-in is recorded within the no-show threshold, the reservation is automatically released.
-23. An auto-released room becomes available again after a configurable grace period.
-24. A no-show is recorded and may trigger a penalty depending on the tenant's policy.
-
-### Waitlist
-25. When a room is fully booked for a given timeslot, users can join the waitlist.
-26. The waitlist is ordered by FIFO by default.
-27. When a cancellation occurs, the first waitlisted user is notified.
-28. The notified user has a configurable acceptance window to confirm.
-29. If they decline or do not respond, the next user on the waitlist is notified.
-30. The waitlist expires automatically once the timeslot becomes irrelevant.
-
-### Reservation status lifecycle
-31. A rejected reservation cannot be reactivated.
-32. A confirmed reservation can be modified or cancelled before it starts.
-33. A reservation in progress (started, not yet ended) cannot be cancelled.
-34. A completed reservation cannot be modified.
-35. A reservation pending approval can be withdrawn by the organizer.
+Requires Docker and Docker Compose.
 
 ---
 
-## Bounded Context 2 – Room Management
+## Iteration 1 Scope (MVP)
 
-### Room creation and configuration
-1. A room is created with a name, capacity, equipment list, and location (building and floor).
-2. A room belongs to exactly one tenant.
-3. A room can be active, blocked, or decommissioned.
-4. A blocked room cannot accept new reservations for the duration of the block.
-5. Decommissioning a room cancels all future reservations and notifies affected organizers.
+**Hypothesis**: Will employees switch from Slack/email to a dedicated booking tool?
 
-### Booking rules per room
-6. A room can define its own minimum and maximum reservation duration.
-7. A room can require a minimum number of participants (e.g. an auditorium requires at least 20 people).
-8. A room can restrict bookings to specific roles (e.g. only managers can book the boardroom).
-9. A room can require approval regardless of the tenant's default policy.
+| IN | OUT |
+|---|---|
+| Book a room (conflict detection, capacity, operating hours) | Approval workflow |
+| Cancel a reservation | Recurring reservations |
+| View my reservations | Check-in / no-show |
+| Email confirmation + cancellation | Waitlist, roles, reminders |
+| Booking horizon (90d), min notice (30min) | Multi-tenancy, room admin UI |
 
-### Equipment
-10. A room's equipment list can be updated at any time.
-11. If equipment is removed from a room, existing reservations that requested that equipment receive a warning notification.
-12. Equipment requirements are checked at reservation time, not enforced as hard blocks.
+Status lifecycle: `create -> CONFIRMED -> CANCELLED` (no PENDING, no approval engine).
+
+Full spec: [`docs/meetsync-refined-spec.md`](docs/meetsync-refined-spec.md) | Gherkin: [`docs/meetsync-iteration1-gherkin.md`](docs/meetsync-iteration1-gherkin.md)
 
 ---
 
-## Bounded Context 3 – Tenant and User Management
+## TDD Commit Discipline
 
-### Tenant onboarding
-1. A tenant is created with a name, a set of buildings, and a default booking policy.
-2. Each tenant operates in complete isolation — rooms, users, and reservations are not shared.
-3. A tenant can configure: booking horizon, minimum advance notice, no-show policy, and approval rules.
+Every feature follows three separate commits visible in `git log`:
 
-### Users and roles
-4. A user belongs to exactly one tenant.
-5. A user can have one of the following roles: Employee, Room Admin, Facilities Admin, Tenant Admin.
-6. A suspended user cannot create new reservations.
-7. Suspending a user cancels all their future reservations and notifies affected participants.
+| Step | Commit prefix | Rule |
+|---|---|---|
+| RED | `test(...)` | Write the failing test. No production code. |
+| GREEN | `feat(...)` | Minimum code to pass. No refactoring. |
+| CLEAN | `refactor(...)` | Apply DDD patterns. No new behavior. |
 
-### Policies
-8. The no-show policy defines: the check-in window, the no-show threshold, and the penalty (warning, suspension, or report).
-9. Policies apply to all users of the tenant unless overridden at room level.
-10. A policy change does not retroactively affect existing confirmed reservations.
+Test ordering follows **TPP** (Transformation Priority Premise). Test names follow **FLFI** (Final Label First Implementation) — business language, no technical jargon.
 
 ---
 
-## Bounded Context 4 – Notifications
+## Documentation
 
-1. The organizer receives a confirmation notification when a reservation is confirmed.
-2. The organizer receives a reminder notification 15 minutes before the reservation starts.
-3. All participants receive a cancellation notification when a reservation is cancelled.
-4. Waitlisted users receive a notification when a slot becomes available.
-5. Affected organizers receive a notification when a room is decommissioned.
-6. Notifications are sent by email by default; additional channels (push, Slack) are configurable per tenant.
-7. A failed notification does not affect the reservation state — notifications are best-effort.
+| File | Content |
+|---|---|
+| [`docs/meetsync-refined-spec.md`](docs/meetsync-refined-spec.md) | Full spec (Three Amigos workshop output) |
+| [`docs/meetsync-iteration1-gherkin.md`](docs/meetsync-iteration1-gherkin.md) | Iteration 1 Gherkin scenarios (10 features, 34 scenarios) |
+| [`docs/event-storming-output.md`](docs/event-storming-output.md) | Event Storming domain model |
+| `docs/*-test-list.md` | TPP-ordered test lists per feature (all marked DONE) |
