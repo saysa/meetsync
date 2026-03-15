@@ -43,7 +43,7 @@ final class DoctrineReservationRepository implements ReservationRepositoryInterf
         $entities = $this->em->getRepository(DoctrineReservationEntity::class)
             ->findBy(['roomId' => $roomId->value]);
 
-        return array_values(array_map($this->toReservation(...), $entities));
+        return array_map($this->toReservation(...), $entities);
     }
 
     /** @return list<Reservation> */
@@ -52,7 +52,7 @@ final class DoctrineReservationRepository implements ReservationRepositoryInterf
         $entities = $this->em->getRepository(DoctrineReservationEntity::class)
             ->findBy(['organizerId' => $organizerId]);
 
-        return array_values(array_map($this->toReservation(...), $entities));
+        return array_map($this->toReservation(...), $entities);
     }
 
     private function toReservation(DoctrineReservationEntity $entity): Reservation
