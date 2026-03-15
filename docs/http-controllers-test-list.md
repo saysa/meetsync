@@ -282,7 +282,7 @@ Success response: `200 OK` + JSON array of reservation objects
 | 9 | should return 404 when attempting to cancel a reservation that does not exist | ✅ DONE |
 | 10 | should return 403 when someone other than the organizer attempts to cancel a reservation | ✅ DONE |
 | 11 | should return 409 when the organizer attempts to cancel a reservation that has already started | ✅ DONE |
-| 12 | should return 200 with an empty list when the organizer has no upcoming reservations | NOT DONE |
+| 12 | should return 200 with an empty list when the organizer has no upcoming reservations | ✅ DONE |
 | 13 | should return 200 with the organizer's upcoming reservations ordered by start time when reservations exist | NOT DONE |
 | 14 | should return 200 with only future reservations when past reservations also exist for the organizer | NOT DONE |
 | 15 | should return 200 with only the requesting organizer's reservations when multiple organizers have bookings | NOT DONE |
