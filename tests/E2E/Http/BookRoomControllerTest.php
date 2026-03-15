@@ -60,4 +60,29 @@ final class BookRoomControllerTest extends WebTestCase
         self::assertArrayHasKey('reservation_id', $data);
         self::assertNotEmpty($data['reservation_id']);
     }
+
+    #[Test]
+    public function should_return_404_when_booking_a_room_that_does_not_exist_in_the_system(): void
+    {
+        // Given
+        $this->clock->setNow(new DateTimeImmutable('2026-03-09 08:00:00 UTC'));
+        // No room seeded
+
+        // When
+        $this->client->request(
+            method: 'POST',
+            uri: '/reservations',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'room_id' => 'unknown-room',
+                'start' => '2026-03-09T14:00:00+00:00',
+                'end' => '2026-03-09T15:30:00+00:00',
+                'participant_count' => 2,
+                'organizer_email' => 'alice.martin@acme.com',
+            ]),
+        );
+
+        // Then
+        self::assertResponseStatusCodeSame(404);
+    }
 }
