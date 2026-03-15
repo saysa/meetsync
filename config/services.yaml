@@ -27,3 +27,18 @@ when@test:
         App\Infrastructure\Adapters\Secondary\Mailer\SymfonyMailerEmailNotifier:
             autowire: true
             public: true
+        App\Tests\Fixtures\FakeClock:
+            public: true
+        App\Tests\Fixtures\InMemoryReservationRepository:
+            public: true
+        App\Tests\Fixtures\InMemoryRoomRepository:
+            public: true
+        App\Domain\Clock\ClockInterface:
+            alias: App\Tests\Fixtures\FakeClock
+            public: true
+        App\Domain\Reservation\ReservationRepositoryInterface:
+            alias: App\Tests\Fixtures\InMemoryReservationRepository
+            public: true
+        App\Domain\Reservation\RoomRepositoryInterface:
+            alias: App\Tests\Fixtures\InMemoryRoomRepository
+            public: true
